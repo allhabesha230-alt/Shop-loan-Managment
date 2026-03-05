@@ -1,0 +1,612 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shop Credit Manager - Mek'ele</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; font-family: 'Noto Sans Ethiopic', system-ui, sans-serif; }
+    .sidebar { min-height: 100vh; background-color: #1a3c34; color: white; width: 240px; position: fixed; transition: transform 0.3s; z-index: 1000; }
+    .sidebar.hidden { transform: translateX(-100%); }
+    .main-content { margin-left: 240px; padding: 1.5rem; transition: margin-left 0.3s; }
+    .nav-link { color: rgba(255,255,255,0.9) !important; padding: 0.75rem 1.25rem !important; }
+    .nav-link:hover, .nav-link.active { background-color: #2e6b5e; }
+    .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .btn-give { background-color: #dc3545; border: none; }
+    .btn-give:hover { background-color: #bb2d3b; }
+    .btn-repay { background-color: #198754; border: none; }
+    .btn-repay:hover { background-color: #157347; }
+    .status-active { color: #dc3545; font-weight: bold; }
+    .status-clear { color: #198754; font-weight: bold; }
+    .advance-alert {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000;
+      padding: 15px 25px; background: #198754; color: white; border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.4s;
+    }
+    .advance-alert.show { opacity: 1; }
+    .lang-btn { font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; border: 1px solid #ddd; background: white; cursor: pointer; }
+    .lang-btn.active { background: #1a3c34; color: white; border-color: #1a3c34; }
+    @media (max-width: 992px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="advanceAlert" class="advance-alert"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div class="p-3">
+    <h4 class="text-center mb-4" data-key="title">Shop Credit Manager</h4>
+    <hr class="bg-light opacity-25">
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="#" class="nav-link active" data-view="dashboard"><i class="bi bi-speedometer2 me-2"></i><span data-key="navDash">Dashboard</span></a></li>
+      <li class="nav-item"><a href="#" class="nav-link" data-view="add-customer"><i class="bi bi-person-plus me-2"></i><span data-key="navAdd">Add Customer</span></a></li>
+      <li class="nav-item"><a href="#" class="nav-link" data-view="customers"><i class="bi bi-people me-2"></i><span data-key="navCustomers">Customers</span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="main-content" id="mainContent">
+  <div class="mb-3">
+    <button class="lang-btn active" id="btn-en">EN</button>
+    <button class="lang-btn" id="btn-am">አማ</button>
+  </div>
+  <nav class="navbar navbar-light bg-white shadow-sm mb-4 d-lg-none">
+    <div class="container-fluid">
+      <button class="btn btn-outline-secondary" type="button" id="menuToggle">☰ Menu</button>
+      <span class="navbar-text fw-bold">Shop Credit Manager</span>
+    </div>
+  </nav>
+
+  <div id="views">
+    <div id="dashboard" class="view active">
+      <h2 class="mb-4" data-key="dashTitle">Dashboard - Overview</h2>
+      <p class="text-muted mb-4" id="todayDate"></p>
+      <div class="row g-4 mb-5">
+        <div class="col-md-4"><div class="card bg-danger text-white"><div class="card-body"><h6 data-key="statGiven">Total Credit Given</h6><h3 id="totalGiven">0 ETB</h3></div></div></div>
+        <div class="col-md-4"><div class="card bg-success text-white"><div class="card-body"><h6 data-key="statRepaid">Total Repaid</h6><h3 id="totalRepaid">0 ETB</h3></div></div></div>
+        <div class="col-md-4">
+          <div class="card" id="netPositionCard">
+            <div class="card-body">
+              <h6 data-key="statNet">Net Position</h6>
+              <h3 id="netPosition">0 ETB</h3>
+              <small id="netExplanation" class="d-block mt-1"></small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 data-key="quickActions">Quick Actions</h5>
+          <div class="d-grid gap-3 d-md-block">
+            <button class="btn btn-danger btn-lg me-3" data-view="add-customer"><i class="bi bi-plus-circle me-2"></i><span data-key="btnAddCust">Add Customer</span></button>
+            <button class="btn btn-outline-success btn-lg" data-view="customers"><i class="bi bi-eye me-2"></i><span data-key="btnViewCust">View Customers</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h5 data-key="activeLoans">Active Credits</h5>
+          <p id="activeLoansText" class="text-muted">No customers added yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="add-customer" class="view d-none">
+      <h2 class="mb-4 text-danger-emphasis" data-key="addCustTitle">Add New Customer</h2>
+      <div class="card p-4 mb-4">
+        <form id="customerForm">
+          <div class="mb-3"><label for="name" class="form-label" data-key="labelName">Full Name</label><input type="text" class="form-control" id="name" required></div>
+          <div class="mb-3"><label for="phone" class="form-label" data-key="labelPhone">Phone Number</label><input type="tel" class="form-control" id="phone"></div>
+          <div class="mb-3"><label for="note" class="form-label" data-key="labelNote">Initial Note (optional)</label><input type="text" class="form-control" id="note"></div>
+          <button type="submit" class="btn btn-danger btn-lg w-100"><i class="bi bi-person-plus me-2"></i><span data-key="btnAddCustomer">Add Customer</span></button>
+        </form>
+        <div class="alert alert-success mt-3" id="successMsg" role="alert" style="display:none;" data-key="msgSuccess">Customer added!</div>
+      </div>
+    </div>
+
+    <div id="customers" class="view d-none">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" data-key="customersTitle">Customers & Credits</h2>
+        <button class="btn btn-outline-danger" data-view="add-customer"><i class="bi bi-person-plus me-2"></i><span data-key="addNewShort">Add New</span></button>
+      </div>
+      <div class="mb-3"><input type="search" class="form-control" id="searchCustomers" placeholder="Search name or phone..."></div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0" id="customersTable">
+            <thead class="table-light">
+              <tr>
+                <th data-key="thName">Name</th>
+                <th data-key="thPhone">Phone</th>
+                <th data-key="thTotalGiven">Total Given</th>
+                <th data-key="thRepaid">Repaid</th>
+                <th data-key="thBalance">Balance</th>
+                <th data-key="thAction">Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="text-center py-4 text-muted" id="noCustomersMsg" data-key="noCustomers">No customers added yet.</div>
+      </div>
+    </div>
+
+    <div id="customer-detail" class="view d-none">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 id="customerTitle"></h2>
+        <button class="btn btn-outline-secondary" data-view="customers"><i class="bi bi-arrow-left me-2"></i><span data-key="btnBack">Back</span></button>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-5">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 data-key="custInfo">Customer Info</h5>
+              <p id="customerInfo"></p>
+              <p><strong data-key="labelTotalGiven">Total credit given:</strong> <span id="totalGivenDisplay" class="fw-bold text-danger">0 ETB</span></p>
+              <p><strong data-key="labelTotalRepaid">Total repaid:</strong> <span id="totalRepaidDisplay" class="fw-bold text-success">0 ETB</span></p>
+              <p><strong data-key="labelBalance">Current balance:</strong> <span id="balanceDisplay" class="fw-bold status-active">0 ETB</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <div class="card">
+            <div class="card-header bg-light">
+              <h5 class="mb-0" data-key="manageCredit">Manage Credit</h5>
+            </div>
+            <div class="card-body">
+              <div class="input-group mb-3">
+                <input type="number" class="form-control" id="creditAmount" placeholder="Amount (ETB)" min="1">
+                <input type="text" class="form-control" id="creditDesc" placeholder="What they took (e.g. 5 kg teff + oil)" style="max-width:280px;">
+                <button class="btn btn-give" id="giveCreditBtn"><i class="bi bi-currency-exchange me-1"></i><span data-key="btnGive">Give Credit</span></button>
+              </div>
+              <div class="input-group mb-3">
+                <input type="number" class="form-control" id="paymentAmount" placeholder="Payment amount (ETB)" min="1">
+                <button class="btn btn-repay" id="recordPaymentBtn"><i class="bi bi-check-circle me-1"></i><span data-key="btnRepay">Record Payment</span></button>
+              </div>
+              <div id="creditMessage" class="alert" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mt-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0" data-key="creditHistory">Credit History</h5>
+        </div>
+        <div class="card-body">
+          <ul id="historyList" class="list-group"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ────────────────────────────────────────────────
+// Translations
+// ────────────────────────────────────────────────
+const translations = {
+  en: {
+    title: "Shop Credit Manager",
+    navDash: "Dashboard", navAdd: "Add Customer", navCustomers: "Customers",
+    dashTitle: "Dashboard - Overview",
+    statGiven: "Total Credit Given", statRepaid: "Total Repaid", statNet: "Net Position",
+    quickActions: "Quick Actions", btnAddCust: "Add Customer", btnViewCust: "View Customers",
+    activeLoans: "Active Credits",
+    addCustTitle: "Add New Customer", labelName: "Full Name", labelPhone: "Phone Number", labelNote: "Initial Note (optional)",
+    btnAddCustomer: "Add Customer", msgSuccess: "Customer added!",
+    customersTitle: "Customers & Credits", noCustomers: "No customers added yet.",
+    thName: "Name", thPhone: "Phone", thTotalGiven: "Total Given", thRepaid: "Repaid", thBalance: "Balance", thAction: "Action",
+    custInfo: "Customer Info", labelTotalGiven: "Total credit given:", labelTotalRepaid: "Total repaid:", labelBalance: "Current balance:",
+    manageCredit: "Manage Credit", btnGive: "Give Credit", btnRepay: "Record Payment",
+    creditHistory: "Credit History", btnBack: "Back",
+    netPositive: "Positive: More repaid than given", netNegative: "Negative: More given than repaid", netBalanced: "Balanced",
+    confirmClear: "Are you sure you want to clear this customer from the list?",
+    cleared: "Cleared",
+    btnClear: "Clear"
+  },
+  am: {
+    title: "የደንበኞች ብድር መቆጣጠሪያ",
+    navDash: "ዳሽቦርድ", navAdd: "ደንበኛ ጨምር", navCustomers: "ደንበኞች",
+    dashTitle: "ዳሽቦርድ - አጠቃላይ እይታ",
+    statGiven: "ጠቅላላ የተሰጠ ብድር", statRepaid: "ጠቅላላ የተመለሰ", statNet: "የተጣራ ሁኔታ",
+    quickActions: "ፈጣን ተግባራት", btnAddCust: "ደንበኛ ጨምር", btnViewCust: "ደንበኞችን እይ",
+    activeLoans: "ንቁ ብድሮች",
+    addCustTitle: "አዲስ ደንበኛ ጨምር", labelName: "ሙሉ ስም", labelPhone: "ስልክ ቁጥር", labelNote: "የመጀመሪያ ማስታወሻ (አማራጭ)",
+    btnAddCustomer: "ደንበኛ ጨምር", msgSuccess: "ደንበኛ ተጨምሯል!",
+    customersTitle: "ደንበኞችና ብድሮች", noCustomers: "ምንም ደንበኛ አልተጨመረም።",
+    thName: "ስም", thPhone: "ስልክ", thTotalGiven: "ጠቅላላ የተሰጠ", thRepaid: "የተመለሰ", thBalance: "ቀሪ", thAction: "ተግባር",
+    custInfo: "የደንበኛ መረጃ", labelTotalGiven: "ጠቅላላ የተሰጠ ብድር፡", labelTotalRepaid: "ጠቅላላ የተመለሰ፡", labelBalance: "የአሁኑ ቀሪ፡",
+    manageCredit: "ብድር አስተዳድር", btnGive: "ብድር ስጥ", btnRepay: "ክፍያ መዝግብ",
+    creditHistory: "የብድር ታሪክ", btnBack: "ተመለስ",
+    netPositive: "አዎንታዊ፡ ከተሰጠው በላይ ተመልሷል", netNegative: "አሉታዊ፡ ከተመለሰው በላይ ተሰጥቷል", netBalanced: "ሚዛናዊ",
+    confirmClear: "ይህን ደንበኛ ከዝርዝሩ ለማጽዳት እርግጠኛ ነዎት?",
+    cleared: "ጸድቷል",
+    btnClear: "አጽዳ"
+  }
+};
+
+let currentLang = 'en';
+let currentCustomerIndex = null;
+const STORAGE_KEY = 'shop_credits';
+let customers = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+// ────────────────────────────────────────────────
+// Ethiopian Calendar
+// ────────────────────────────────────────────────
+const ethiopianMonths = [
+  'መስከረም', 'ጥቅምት', 'ህዳር', 'ታህሳስ', 'ጥር', 'የካቲት',
+  'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜ'
+];
+
+const ethiopianWeekdays = ['እሑድ', 'ሰኞ', 'ማክሰኞ', 'ረቡዕ', 'ሐሙስ', 'ዓርብ', 'ቅዳሜ'];
+
+function gregorianToEthiopian(date) {
+  let y = date.getFullYear();
+  let m = date.getMonth() + 1;
+  let d = date.getDate();
+
+  let a = Math.floor((14 - m) / 12);
+  let yy = y + 4800 - a;
+  let mm = m + 12 * a - 3;
+  let jd = d + Math.floor((153 * mm + 2) / 5) + 365 * yy + Math.floor(yy / 4) - Math.floor(yy / 100) + Math.floor(yy / 400) - 32045;
+
+  let jdEth = jd - 1724220;
+  let year = Math.floor(jdEth / 365.25) + 1;
+  let doy = Math.floor(jdEth - (year - 1) * 365.25) + 1;
+
+  let leap = (year % 4 === 3);
+  if (doy > (leap ? 366 : 365)) {
+    year++;
+    doy -= leap ? 366 : 365;
+  }
+
+  let month = Math.floor((doy - 1) / 30) + 1;
+  let day = (doy - 1) % 30 + 1;
+
+  if (month > 13) {
+    month = 13;
+    day = doy - 360;
+  }
+  let weekday = (date.getDay() + 0) % 7; 
+  return { year, month: month - 1, day, weekday };
+}
+
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  if (currentLang === 'am') {
+    const et = gregorianToEthiopian(date);
+    const monthName = ethiopianMonths[et.month];
+    const weekdayName = ethiopianWeekdays[et.weekday];
+    return `${weekdayName}, ${et.day} ${monthName} ${et.year}`;
+  } else {
+    return date.toLocaleDateString('en-GB');
+  }
+}
+
+function formatDateTime(iso) {
+  const d = new Date(iso);
+  const datePart = formatDate(iso);
+  const timePart = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return `${datePart} ${timePart}`;
+}
+
+function getToday() {
+  return new Date().toISOString();
+}
+
+function setLanguage(lang) {
+  currentLang = lang;
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const key = el.getAttribute('data-key');
+    if (translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-am').classList.toggle('active', lang === 'am');
+  updateDashboard();
+  if (!document.getElementById('customers').classList.contains('d-none')) loadCustomers();
+}
+
+// ────────────────────────────────────────────────
+// Data
+// ────────────────────────────────────────────────
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
+}
+
+// ────────────────────────────────────────────────
+// View switching
+// ────────────────────────────────────────────────
+function showView(viewId, customerIndex = null) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('d-none'));
+  document.getElementById(viewId)?.classList.remove('d-none');
+
+  document.querySelectorAll('[data-view]').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-view') === viewId);
+  });
+
+  if (window.innerWidth < 992) document.getElementById('sidebar')?.classList.remove('show');
+
+  if (viewId === 'dashboard') updateDashboard();
+  if (viewId === 'customers') loadCustomers();
+  if (viewId === 'customer-detail' && customerIndex !== null) {
+    currentCustomerIndex = customerIndex;
+    loadCustomerDetail(customerIndex);
+  }
+}
+
+// ────────────────────────────────────────────────
+// Event listeners (FIXED: Runs only once)
+// ────────────────────────────────────────────────
+function initializeEventListeners() {
+  document.getElementById('btn-en')?.addEventListener('click', () => setLanguage('en'));
+  document.getElementById('btn-am')?.addEventListener('click', () => setLanguage('am'));
+
+  document.getElementById('menuToggle')?.addEventListener('click', () => {
+    document.getElementById('sidebar')?.classList.toggle('show');
+  });
+
+  document.querySelectorAll('[data-view]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      showView(link.getAttribute('data-view'));
+    });
+  });
+
+  const form = document.getElementById('customerForm');
+  if (form) {
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('name')?.value.trim();
+      if (!name) {
+        alert(currentLang === 'en' ? "Name is required" : "ስም ያስፈልጋል");
+        return;
+      }
+      customers.push({
+        name,
+        phone: document.getElementById('phone')?.value.trim() || '',
+        note: document.getElementById('note')?.value.trim() || '',
+        balance: 0,
+        history: []
+      });
+      saveData();
+      const msg = document.getElementById('successMsg');
+      if (msg) {
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 2800);
+      }
+      form.reset();
+      updateDashboard();
+      showView('customers');
+    });
+  }
+
+  document.getElementById('giveCreditBtn')?.addEventListener('click', () => {
+    const amtInput = document.getElementById('creditAmount');
+    const amt = Number(amtInput?.value);
+    const desc = document.getElementById('creditDesc')?.value.trim() || '';
+    
+    if (amt <= 0 || isNaN(amt)) {
+        alert(currentLang === 'en' ? 'Please enter a valid amount' : 'እባክዎ ትክክለኛ መጠን ያስገቡ');
+        return;
+    }
+
+    const c = customers[currentCustomerIndex];
+    if (c) {
+      c.balance += amt;
+      c.history.push({ timestamp: new Date().toISOString(), type: 'given', amount: amt, desc });
+      saveData();
+      showAlert(currentLang === 'en' ? 'Credit recorded!' : 'ብድር ተመዝግቧል!');
+      loadCustomerDetail(currentCustomerIndex);
+      amtInput.value = '';
+      document.getElementById('creditDesc').value = '';
+    }
+  });
+
+  document.getElementById('recordPaymentBtn')?.addEventListener('click', () => {
+    const amtInput = document.getElementById('paymentAmount');
+    const amt = Number(amtInput?.value);
+    if (isNaN(amt) || amt <= 0) {
+      alert(currentLang === 'en' ? 'Please enter a valid amount' : 'እባክዎ ትክክለኛ መጠን ያስገቡ');
+      return;
+    }
+    const c = customers[currentCustomerIndex];
+    if (c) {
+      if (amt > c.balance) {
+        alert(currentLang === 'en' ? 'Amount larger than balance' : 'መጠኑ ከቀሪው ብዙ ነው');
+        return;
+      }
+      c.balance -= amt;
+      c.history.push({ timestamp: new Date().toISOString(), type: 'repaid', amount: amt, desc: '' });
+      saveData();
+      showAlert(currentLang === 'en' ? 'Payment recorded!' : 'ክፍያ ተመዝግቧል!');
+      loadCustomerDetail(currentCustomerIndex);
+      amtInput.value = '';
+    }
+  });
+}
+
+function showAlert(msg) {
+  const el = document.getElementById('advanceAlert');
+  if (el) {
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+}
+
+// ────────────────────────────────────────────────
+// Dashboard
+// ────────────────────────────────────────────────
+function updateDashboard() {
+  const todayEl = document.getElementById('todayDate');
+  if (todayEl) {
+    todayEl.textContent = currentLang === 'en'
+      ? `Today: ${formatDate(getToday())}`
+      : `ዛሬ፡ ${formatDate(getToday())}`;
+  }
+
+  let totalGiven = 0, totalRepaid = 0;
+  customers.forEach(c => {
+    c.history.forEach(h => {
+      if (h.type === 'given') totalGiven += h.amount;
+      if (h.type === 'repaid') totalRepaid += h.amount;
+    });
+  });
+  const net = totalRepaid - totalGiven;
+
+  document.getElementById('totalGiven').textContent = `${totalGiven.toFixed(0)} ETB`;
+  document.getElementById('totalRepaid').textContent = `${totalRepaid.toFixed(0)} ETB`;
+  document.getElementById('netPosition').textContent = `${net.toFixed(0)} ETB`;
+
+  const card = document.getElementById('netPositionCard');
+  const expl = document.getElementById('netExplanation');
+  if (card && expl) {
+    card.className = net > 0 ? 'card bg-success text-white' :
+                     net < 0 ? 'card bg-danger text-white' :
+                     'card bg-secondary text-white';
+    expl.textContent = translations[currentLang][net > 0 ? 'netPositive' : net < 0 ? 'netNegative' : 'netBalanced'];
+  }
+
+  const activeText = document.getElementById('activeLoansText');
+  const count = customers.filter(c => c.balance > 0).length;
+  if (activeText) {
+    activeText.innerHTML = count > 0
+      ? (currentLang === 'en' ? `<strong>${count}</strong> customers still owe money.` : `<strong>${count}</strong> ደንበኞች ገና አልከፈሉም።`)
+      : (currentLang === 'en' ? "All credits cleared or no customers yet." : "ሁሉም ብድሮች ተጠናቀቁ ወይም ደንበኛ የለም።");
+  }
+}
+
+// ────────────────────────────────────────────────
+// Customers list
+// ────────────────────────────────────────────────
+function loadCustomers() {
+  const tbody = document.querySelector('#customersTable tbody');
+  const noMsg = document.getElementById('noCustomersMsg');
+  if (!tbody || !noMsg) return;
+
+  tbody.innerHTML = '';
+  noMsg.style.display = customers.length === 0 ? 'block' : 'none';
+
+  customers.forEach((c, i) => {
+    let given = 0, repaid = 0;
+    c.history.forEach(h => {
+      if (h.type === 'given') given += h.amount;
+      if (h.type === 'repaid') repaid += h.amount;
+    });
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><a href="#" class="text-primary fw-bold customer-link" data-index="${i}">${c.name}</a></td>
+      <td>${c.phone || '—'}</td>
+      <td>${given.toFixed(0)} ETB</td>
+      <td>${repaid.toFixed(0)} ETB</td>
+      <td class="${c.balance > 0 ? 'status-active' : 'status-clear'}">
+        ${c.balance > 0 ? c.balance.toFixed(0) + ' ETB' : translations[currentLang].cleared}
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary customer-detail-btn me-1" data-index="${i}">
+          <i class="bi bi-eye"></i> Detail
+        </button>
+        ${c.balance <= 0 ? `
+          <button class="btn btn-sm btn-outline-danger clear-customer-btn" data-index="${i}">
+            <i class="bi bi-trash"></i> ${translations[currentLang].btnClear}
+          </button>
+        ` : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('.customer-link, .customer-detail-btn').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      showView('customer-detail', parseInt(el.dataset.index));
+    });
+  });
+
+  document.querySelectorAll('.clear-customer-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      const idx = parseInt(btn.dataset.index);
+      if (confirm(translations[currentLang].confirmClear + '\n' + customers[idx].name)) {
+        customers.splice(idx, 1);
+        saveData();
+        loadCustomers();
+        updateDashboard();
+        showAlert(currentLang === 'en' ? 'Customer cleared!' : 'ደንበኛ ተጽድቷል!');
+      }
+    });
+  });
+
+  const search = document.getElementById('searchCustomers');
+  if (search) {
+    search.oninput = () => {
+      const term = search.value.toLowerCase();
+      tbody.querySelectorAll('tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    };
+  }
+}
+
+// ────────────────────────────────────────────────
+// Customer detail
+// ────────────────────────────────────────────────
+function loadCustomerDetail(index) {
+  const c = customers[index];
+  if (!c) return;
+
+  document.getElementById('customerTitle').textContent = c.name;
+
+  document.getElementById('customerInfo').innerHTML = `
+    ${currentLang === 'en' ? 'Phone' : 'ስልክ'}: ${c.phone || '—'}<br>
+    ${currentLang === 'en' ? 'Note' : 'ማስታወሻ'}: ${c.note || '—'}<br>
+    ${currentLang === 'en' ? 'First transaction' : 'የመጀመሪያ ግብይት'}: ${c.history.length ? formatDateTime(c.history[0].timestamp) : '—'}
+  `;
+
+  let given = 0, repaid = 0;
+  c.history.forEach(h => {
+    if (h.type === 'given') given += h.amount;
+    if (h.type === 'repaid') repaid += h.amount;
+  });
+
+  document.getElementById('totalGivenDisplay').textContent = `${given.toFixed(0)} ETB`;
+  document.getElementById('totalRepaidDisplay').textContent = `${repaid.toFixed(0)} ETB`;
+  document.getElementById('balanceDisplay').textContent = `${c.balance.toFixed(0)} ETB`;
+  document.getElementById('balanceDisplay').className = c.balance > 0 ? 'fw-bold status-active' : 'fw-bold status-clear';
+
+  const list = document.getElementById('historyList');
+  list.innerHTML = c.history.length === 0
+    ? `<li class="list-group-item text-muted">${currentLang === 'en' ? 'No transactions yet.' : 'ገና ምንም ግብይት የለም።'}</li>`
+    : '';
+
+  c.history.slice().reverse().forEach(h => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+    const typeLabel = h.type === 'given'
+      ? (currentLang === 'en' ? 'Credit given' : 'ብድር ተሰጠ')
+      : (currentLang === 'en' ? 'Payment received' : 'ክፍያ ተቀበለ');
+    li.innerHTML = `
+      <span>${formatDateTime(h.timestamp)} — ${typeLabel}: <strong>${h.amount} ETB</strong> ${h.desc ? '— ' + h.desc : ''}</span>
+      <span class="badge ${h.type === 'given' ? 'bg-danger' : 'bg-success'}">${h.type === 'given' ? 'Given' : 'Repaid'}</span>
+    `;
+    list.appendChild(li);
+  });
+}
+
+// ────────────────────────────────────────────────
+// Initialize
+// ────────────────────────────────────────────────
+initializeEventListeners();
+setLanguage('en');
+showView('dashboard');
+</script>
+</body>
+</html>
