@@ -1,0 +1,2392 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>ምስጌ ፑል - Mek'ele</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Ethiopic:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+  
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --sidebar-bg: linear-gradient(180deg, #0a2a1a 0%, #0d5e3a 50%, #0e7a4b 100%);
+      --sidebar-text: rgba(255, 255, 255, 0.85);
+      --primary: #14b8a6;
+      --primary-hover: #0d9488;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --hover-bg: rgba(20, 184, 166, 0.05);
+      --input-bg: #ffffff;
+      --modal-bg: #ffffff;
+      --readonly-bg: #f8fafc;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+      --sidebar-bg: linear-gradient(180deg, #020617 0%, #0f172a 50%, #1e293b 100%);
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      --hover-bg: rgba(20, 184, 166, 0.1);
+      --input-bg: #334155;
+      --modal-bg: #1e293b;
+      --readonly-bg: #1a2332;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans Ethiopic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .login-page {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a2a1a 0%, #0d5e3a 40%, #0e7a4b 100%);
+      padding: 20px;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 24px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.5s ease;
+    }
+
+    .login-card .logo { text-align: center; margin-bottom: 1.5rem; }
+
+    .login-card .logo h1 {
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-weight: 900;
+      color: #0d5e3a;
+      font-size: 2rem;
+      margin-bottom: 0;
+    }
+
+    .login-card .logo .subtitle {
+      color: #64748b;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .role-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+      user-select: none;
+    }
+
+    .role-card:hover {
+      border-color: #14b8a6;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+    }
+
+    .role-card.selected {
+      border-color: #14b8a6;
+      background: linear-gradient(135deg, #14b8a610, #0d5e3a10);
+      box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.15);
+    }
+
+    .role-card i { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .admin-role i { color: #7c3aed; }
+    .cashier-role i { color: #f59e0b; }
+
+    .role-card h3 {
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+      color: #1e293b;
+    }
+
+    .role-card p { font-size: 0.8rem; color: #64748b; margin: 0; }
+
+    .password-section {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, margin 0.4s ease;
+      margin-bottom: 0;
+    }
+
+    .password-section.show { max-height: 100px; margin-bottom: 1rem; }
+
+    .password-input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-input-group input { flex: 1; padding-right: 50px; }
+
+    .toggle-password {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 8px;
+    }
+
+    .toggle-password:hover { color: #1e293b; }
+
+    .login-error {
+      color: #ef4444;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: #fef2f2;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .login-error.show { display: block; }
+
+    .login-btn {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #14b8a6, #0d5e3a);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(20, 184, 166, 0.4);
+    }
+
+    .login-btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    #mainApp { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.7);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 0.3rem;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar .nav-link i { font-size: 1.1rem; width: 24px; text-align: center; }
+
+    .sidebar .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(3px);
+    }
+
+    .sidebar .nav-link.active {
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.3), rgba(14, 122, 75, 0.3));
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(20, 184, 166, 0.3);
+    }
+
+    .sidebar .nav-link.disabled-link { opacity: 0.4; pointer-events: none; cursor: not-allowed; }
+
+    .sidebar-footer {
+      padding: 1rem;
+      margin-top: auto;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      letter-spacing: 1px;
+      font-size: 0.85rem;
+    }
+
+    .logout-btn:hover { background: rgba(239, 68, 68, 0.3); color: #fecaca; }
+
+    .theme-toggle, .lang-btn {
+      border-radius: 8px;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .lang-btn { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+
+    .user-info-bar {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .user-role-badge {
+      padding: 0.35rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+    }
+
+    .admin-badge { background: linear-gradient(135deg, #7c3aed20, #a78bfa20); color: #7c3aed; border: 1px solid #7c3aed40; }
+    .cashier-badge { background: linear-gradient(135deg, #f59e0b20, #fbbf2420); color: #f59e0b; border: 1px solid #f59e0b40; }
+
+    .sync-indicator { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .sync-indicator.online .sync-dot { background: #10b981; }
+    .sync-indicator.offline .sync-dot { background: #ef4444; }
+    .sync-indicator.syncing .sync-dot { background: #f59e0b; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .stat-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.3s ease;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-card h3 { font-weight: 800; font-size: 1.6rem; font-family: 'Rajdhani', 'Inter', sans-serif; }
+    .stat-card h6 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+
+    .page-header h2 {
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .form-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label { font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.4rem; }
+
+    .form-control, .form-select {
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+    }
+
+    .table-container {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+    table thead th {
+      background: var(--bg);
+      padding: 0.8rem 1rem;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+
+    table tbody td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    table tbody tr:hover { background: var(--hover-bg); }
+    table tbody tr.low-stock-warning { background: #fef2f210; border-left: 3px solid #ef4444; }
+
+    .badge {
+      padding: 0.35rem 0.7rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-primary { background: #14b8a620; color: #14b8a6; }
+    .badge-success { background: #10b98120; color: #10b981; }
+    .badge-danger { background: #ef444420; color: #ef4444; }
+    .badge-warning { background: #f59e0b20; color: #f59e0b; }
+    .badge-info { background: #3b82f620; color: #3b82f6; }
+    .badge-cost { background: #f59e0b20; color: #f59e0b; font-weight: 700; }
+    .badge-paid { background: #10b98120; color: #10b981; }
+    .badge-pending { background: #f59e0b20; color: #f59e0b; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      border: none;
+      border-radius: 10px;
+      padding: 0.6rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4); }
+
+    .btn-success { background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+    .btn-outline-primary {
+      border: 2px solid #14b8a6;
+      color: #14b8a6;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-outline-primary:hover, .btn-outline-primary.active { background: #14b8a6; color: white; }
+
+    .type-chip, .category-chip {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .type-chip:hover, .category-chip:hover { border-color: #14b8a6; color: #14b8a6; }
+    .type-chip.active, .category-chip.active { background: #14b8a6; color: white; border-color: #14b8a6; }
+
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .product-card:hover { border-color: #14b8a6; background: var(--hover-bg); transform: translateX(3px); }
+
+    .cost-percentage-btn {
+      display: inline-block;
+      padding: 0.35rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border: 1px solid #f59e0b40;
+      background: transparent;
+      color: #f59e0b;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    .cost-percentage-btn:hover { background: #f59e0b20; }
+    .cost-percentage-btn.selected { background: #f59e0b; color: white; }
+
+    .pending-payment-card {
+      background: var(--card);
+      border: 1px solid #f59e0b30;
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--card-shadow);
+      border-left: 4px solid #f59e0b;
+    }
+
+    .modal-content {
+      background: var(--modal-bg);
+      color: var(--text);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .modal-header { border-bottom: 1px solid var(--border); }
+    .modal-footer { border-top: 1px solid var(--border); }
+    .btn-close { filter: invert(0.5); }
+
+    .inline-edit-input {
+      width: 100%;
+      max-width: 120px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .inline-edit-input:focus {
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+      outline: none;
+    }
+
+    .inline-edit-input.stock-input {
+      max-width: 80px;
+    }
+
+    .inline-edit-input.readonly-input {
+      background: var(--readonly-bg);
+      cursor: default;
+      border-color: transparent;
+    }
+
+    .inline-edit-input.readonly-input:focus {
+      border-color: transparent;
+      box-shadow: none;
+      outline: none;
+    }
+
+    .stock-value-display {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    @media (max-width: 991px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 1rem; }
+      .login-card { padding: 1.5rem; }
+      .inline-edit-input { max-width: 80px; font-size: 0.8rem; }
+      .inline-edit-input.stock-input { max-width: 60px; }
+    }
+
+    @media (max-width: 576px) {
+      .login-card { padding: 1rem; border-radius: 16px; }
+      .login-card .logo h1 { font-size: 1.5rem; }
+      .role-card { padding: 1rem 0.5rem; }
+      .role-card i { font-size: 2rem; }
+      .role-card h3 { font-size: 1rem; }
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+    .list-group-item {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px !important;
+      margin-bottom: 0.3rem;
+      transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover { background: var(--hover-bg); }
+
+    .navbar .btn-outline-secondary { border-color: var(--border); color: var(--text); cursor: pointer; }
+    .security-menu { border-top: 1px solid rgba(255, 255, 255, 0.2) !important; padding-top: 1rem !important; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .view { animation: fadeIn 0.3s ease; }
+    .stat-card { animation: fadeIn 0.5s ease; }
+
+    .save-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 4px;
+    }
+
+    .save-indicator.saved { background: #10b981; }
+    .save-indicator.saving { background: #f59e0b; animation: pulse 1s infinite; }
+  </style>
+</head>
+<body>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="login-page">
+    <div class="login-card">
+      <div class="logo">
+        <h1>🎱 ምስጌ ፑል</h1>
+        <p class="subtitle">Misge Pool - Mek'ele</p>
+        <p class="subtitle mt-2" style="font-family: 'Orbitron', sans-serif; letter-spacing: 2px; color: #0d5e3a;" data-translate="billiardSupply">BILLIARD SUPPLY</p>
+      </div>
+      
+      <h5 class="text-center mb-3" style="color: #334155; font-family: 'Orbitron', 'Rajdhani', sans-serif;" id="selectRoleText" data-translate="selectRole">SELECT ROLE TO LOGIN</h5>
+      
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <div class="role-card admin-role" id="adminRoleCard">
+            <i class="bi bi-shield-lock-fill"></i>
+            <h3 id="adminText" data-translate="admin">ADMIN</h3>
+            <p id="adminDescText" data-translate="fullAccess">Full System Access</p>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="role-card cashier-role" id="cashierRoleCard">
+            <i class="bi bi-cart-check-fill"></i>
+            <h3 id="cashierText" data-translate="cashier">CASHIER</h3>
+            <p id="cashierDescText" data-translate="salesOnly">Sales Only</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="password-section" id="passwordSection">
+        <label class="form-label fw-bold" id="passwordLabel" data-translate="adminPassword">🔐 Admin Password</label>
+        <div class="password-input-group">
+          <input type="password" class="form-control" id="loginPassword" data-translate-placeholder="enterPassword" placeholder="Enter admin password">
+          <button type="button" class="toggle-password" id="togglePwdBtn">
+            <i class="bi bi-eye-slash-fill"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="login-error" id="loginError" data-translate="wrongPassword">❌ Incorrect password! Please try again.</div>
+      
+      <button class="btn login-btn" id="loginButton" disabled="disabled">
+        <i class="bi bi-box-arrow-in-right"></i> <span id="loginBtnText" data-translate="loginSystem">LOGIN TO SYSTEM</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp" style="display: none;">
+    <nav class="sidebar" id="sidebar">
+      <div class="p-4">
+        <h4 class="text-center mb-3" style="color: white; font-weight: 900; font-family: 'Orbitron', 'Rajdhani', sans-serif; letter-spacing: 3px; text-shadow: 0 0 20px rgba(245,158,11,0.5);">🎱 ምስጌ ፑል</h4>
+        <p class="text-center mb-4" style="color: rgba(255,255,255,0.6); font-size: 0.75rem; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;" id="sidebarSubtitle" data-translate="billiardSupply">BILLIARD SUPPLY</p>
+        <div class="d-flex justify-content-center gap-2 mb-4">
+          <button class="theme-toggle" id="themeToggleBtn"><i class="bi bi-moon-fill"></i></button>
+          <button class="lang-btn btn btn-sm btn-outline-light" id="langEnBtn" style="background: rgb(20, 184, 166);">EN</button>
+          <button class="lang-btn btn btn-sm btn-outline-light" id="langAmBtn">አማ</button>
+        </div>
+        <hr class="bg-light opacity-25">
+        <ul class="nav flex-column" id="sidebarNav">
+          <li class="nav-item"><a href="#" class="nav-link active" data-view="dashboard"><i class="bi bi-speedometer2"></i> <span class="nav-text" data-translate="dashboard">Dashboard</span></a></li>
+          <li class="nav-item"><a href="#" class="nav-link" data-view="inventory"><i class="bi bi-box-seam"></i> <span class="nav-text" data-translate="inventory">Inventory</span></a></li>
+          <li class="nav-item"><a href="#" class="nav-link" data-view="add-product"><i class="bi bi-plus-circle"></i> <span class="nav-text" data-translate="addProduct">Add Product</span></a></li>
+          <li class="nav-item"><a href="#" class="nav-link" data-view="pos"><i class="bi bi-cart"></i> <span class="nav-text" data-translate="pos">Point of Sale</span></a></li>
+          <li class="nav-item"><a href="#" class="nav-link" data-view="sales"><i class="bi bi-receipt"></i> <span class="nav-text" data-translate="salesHistory">Sales History</span></a></li>
+          <li class="nav-item"><a href="#" class="nav-link" data-view="pending-payments"><i class="bi bi-clock-history"></i> <span class="nav-text" data-translate="pendingPayments">Pending Payments</span></a></li>
+          <li class="nav-item"><a href="#" class="nav-link" data-view="customers"><i class="bi bi-people"></i> <span class="nav-text" data-translate="customers">Customers</span></a></li>
+          <li class="nav-item"><a href="#" class="nav-link" data-view="categories"><i class="bi bi-tags"></i> <span class="nav-text" data-translate="categoriesTypes">Categories &amp; Types</span></a></li>
+          <li class="nav-item security-menu mt-4 pt-3 border-top border-light"><a href="#" class="nav-link" data-view="security"><i class="bi bi-shield-lock"></i> <span class="nav-text" data-translate="securityBackup">Security &amp; Backup</span></a></li>
+        </ul>
+      </div>
+      <div class="sidebar-footer">
+        <button class="logout-btn" id="logoutBtn"><i class="bi bi-box-arrow-left"></i> <span id="logoutText" data-translate="logout">LOGOUT</span></button>
+      </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+      <nav class="navbar d-lg-none mb-4" style="background: var(--card); border-radius: 14px;">
+        <div class="container-fluid">
+          <button class="btn btn-outline-secondary" type="button" id="menuToggle"><i class="bi bi-list"></i> <span data-translate="menu">Menu</span></button>
+          <span class="fw-bold">🎱 ምስጌ ፑል</span>
+        </div>
+      </nav>
+
+      <div class="user-info-bar">
+        <div>
+          <i class="bi bi-person-circle"></i> 
+          <strong id="loggedInUserDisplay">Admin</strong>
+          <span id="syncStatus" class="sync-indicator online ms-2">
+            <span class="sync-dot"></span>
+            <span id="syncText" data-translate="synced">Synced</span>
+          </span>
+        </div>
+        <span class="user-role-badge" id="loggedInRoleBadge">Admin</span>
+      </div>
+
+      <div id="views">
+        <!-- Dashboard -->
+        <div id="dashboard" class="view">
+          <div class="d-flex justify-content-between align-items-center mb-4 page-header">
+            <h2 data-translate="dashboardTitle">Dashboard - ምስጌ ፑል</h2>
+            <div>
+              <span class="badge bg-primary" id="todayDateEthiopian">29 ሰኔ 2018</span>
+              <span class="badge bg-secondary ms-2" id="todayDateGregorian">Jul 6, 2026</span>
+            </div>
+          </div>
+          <div class="row g-4 mb-5">
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-cash-stack"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="todayRevenue">Today's Revenue</h6><h3 id="todayRevenue" class="mb-0">0 ETB</h3></div></div></div></div>
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon" style="background: #f59e0b20; color: #f59e0b;"><i class="bi bi-truck"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="todayCost">Today's Cost</h6><h3 id="todayCost" class="mb-0" style="color: #f59e0b;">0 ETB</h3></div></div></div></div>
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-graph-up"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="todayProfit">Today's Profit</h6><h3 id="todayProfit" class="mb-0">0 ETB</h3></div></div></div></div>
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-box"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="totalProducts">Total Products</h6><h3 id="totalProducts" class="mb-0">1</h3></div></div></div></div>
+          </div>
+          <div class="row g-4 mb-5">
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-exclamation-triangle"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="lowStock">Low Stock Items</h6><h3 id="lowStockCount" class="mb-0">0</h3></div></div></div></div>
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-calendar-range"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="allTimeRevenue">All Time Revenue</h6><h3 id="allTimeRevenue" class="mb-0">90,000 ETB</h3></div></div></div></div>
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-graph-up"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="allTimeProfit">All Time Profit</h6><h3 id="allTimeProfit" class="mb-0">8,200 ETB</h3></div></div></div></div>
+            <div class="col-xl-3 col-md-6"><div class="stat-card"><div class="d-flex align-items-center"><div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-clock-history"></i></div><div class="ms-3"><h6 class="text-muted mb-1" data-translate="pendingAmount">Pending Payments</h6><h3 id="pendingAmount" class="mb-0">0 ETB</h3></div></div></div></div>
+          </div>
+          <div class="row"><div class="col-12"><div class="table-container"><h5 class="mb-3 text-danger" data-translate="lowStockAlert">⚠️ Low Stock Alert (Below 5 units)</h5><table><thead><tr><th data-translate="product">Product</th><th data-translate="stock">Stock</th><th data-translate="action">Action</th></tr></thead><tbody id="lowStockBody"><tr><td colspan="3" class="text-center">All stock OK</td></tr></tbody></table></div></div></div>
+        </div>
+
+        <!-- Inventory -->
+        <div id="inventory" class="view d-none">
+          <div class="d-flex justify-content-between align-items-center mb-4 page-header">
+            <h2 data-translate="inventoryManagement">Inventory Management</h2>
+            <button class="btn btn-primary add-product-btn" id="addProductBtnTop" onclick="resetToAddMode(); showView('add-product');"><i class="bi bi-plus-circle"></i> <span data-translate="addProduct">Add Product</span></button>
+          </div>
+          <div id="totalStockValueBanner" style="background: linear-gradient(135deg, #0a2a1a, #0d5e3a, #0e7a4b); color: white; border-radius: 20px; padding: 1.8rem; margin-bottom: 1.5rem; text-align: center; border: 2px solid rgba(245,158,11,0.4);"><small data-translate="totalStockValue">💰 Total Stock Value</small><h3 id="totalStockValue" style="font-size: 2.2rem; font-weight: 900;">0 ETB</h3></div>
+          <div class="row mb-4">
+            <div class="col-md-4"><input type="text" class="form-control" id="searchInventory" data-translate-placeholder="searchProducts" placeholder="Search products..."></div>
+            <div class="col-md-3"><select class="form-select" id="filterProductType"><option value="all" selected="selected">All Types</option><option>Pool</option><option>Karambula</option></select></div>
+            <div class="col-md-3"><select class="form-select" id="filterCategory"><option value="all" selected="selected">All Categories</option><option>Pool Table</option><option>Slate Stone</option><option>Billiard Balls</option><option>Cue Sticks</option><option>Table Cloth</option><option>Pockets</option><option>Cushions</option><option>Accessories</option><option>Other</option></select></div>
+          </div>
+          <div class="table-container"><table><thead><tr><th data-translate="product">Product</th><th data-translate="type">Type</th><th data-translate="category">Category</th><th data-translate="sizeDetail">Size/Detail</th><th data-translate="cost">Cost</th><th data-translate="stock">Stock</th><th id="stockValueHeader" data-translate="stockValue">Stock Value</th><th id="actionsHeader" data-translate="actions">Actions</th></tr></thead><tbody id="inventoryBody"></tbody></table></div>
+        </div>
+
+        <!-- Add Product -->
+        <div id="add-product" class="view d-none">
+          <h2 class="mb-4 page-header" id="addProductTitle" data-translate="addNewProduct">Add New Product</h2>
+          <div class="row">
+            <div class="col-lg-8">
+              <div class="form-card">
+                <form id="productForm">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label" data-translate="productType">Type (ዓይነት)</label>
+                      <select class="form-select" id="productTypeSelect" required=""><option value="" selected="selected">Select Type</option><option>Pool</option><option>Karambula</option></select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" data-translate="productName">Product Name</label>
+                      <input type="text" class="form-control" id="productName" required="" placeholder="e.g. Marble Pool Table">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" data-translate="category">Category</label>
+                      <select class="form-select" id="productCategory" required=""><option value="" selected="selected">Select Category</option><option>Pool Table</option><option>Slate Stone</option><option>Billiard Balls</option><option>Cue Sticks</option><option>Table Cloth</option><option>Pockets</option><option>Cushions</option><option>Accessories</option><option>Other</option></select>
+                    </div>
+                    <div class="col-md-6" id="typeFieldContainer" style="display: none;">
+                      <label class="form-label" data-translate="sizeDetail">Size/Detail</label>
+                      <input type="text" class="form-control" id="productTypeDetail">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" data-translate="costPrice">Cost Price (ETB)</label>
+                      <input type="number" class="form-control" id="productCost" min="0" step="1" required="">
+                      <small class="text-muted" id="costHelp" style="display: none;"></small>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" data-translate="quantity">Quantity</label>
+                      <input type="number" class="form-control" id="productQuantity" min="0" step="1" value="1" required="">
+                      <small class="text-muted" id="quantityHelp" data-translate="enterStock">Enter initial stock quantity</small>
+                    </div>
+                    <div class="col-12">
+                      <button type="submit" class="btn btn-primary w-100" id="productSubmitBtn">
+                        <i class="bi bi-save"></i> <span id="productSubmitText" data-translate="saveProduct">Save Product</span>
+                      </button>
+                      <button type="button" class="btn btn-outline-danger w-100 mt-2" id="cancelEditBtn" style="display: none;" onclick="resetToAddMode(); showView('inventory');">
+                        <i class="bi bi-x-circle"></i> <span data-translate="cancelEdit">Cancel Edit</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="form-card" id="tipsCard">
+                <h5 class="mb-3" data-translate="quickTips">📌 Quick Tips</h5>
+                <ul class="list-unstyled">
+                  <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> <span data-translate="tipSellingPrice">Selling price is set during sale</span></li>
+                  <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> <span data-translate="tipCategories">Create categories and types first</span></li>
+                  <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> <span data-translate="tipLowStock">Low stock alert at 5 units</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POS -->
+        <div id="pos" class="view d-none">
+          <h2 class="mb-4 page-header" data-translate="posTitle">Point of Sale</h2>
+          <div class="row">
+            <div class="col-lg-7">
+              <div class="form-card mb-4">
+                <div class="position-relative"><input type="text" class="form-control" id="posSearch" data-translate-placeholder="searchProducts" placeholder="Search products..."><div id="posSuggestions" class="position-absolute w-100 mt-1 shadow rounded" style="display: none; z-index: 1000; max-height: 300px; overflow-y: auto; background: var(--card);"></div></div>
+                <div class="mt-3"><h6 class="mb-2" data-translate="filterByType">Filter by Type:</h6><div class="d-flex flex-wrap gap-2" id="typeChips"></div></div>
+                <div class="mt-3"><h6 class="mb-2" data-translate="selectCategory">Select Category</h6><div class="d-flex flex-wrap gap-2" id="categoryChips"></div></div>
+                <div class="mt-4"><h6 class="mb-3" id="selectedCategoryTitle" data-translate="chooseCategory">Choose a category to see products</h6><div id="productsList" style="max-height: 400px; overflow-y: auto;"></div></div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="form-card">
+                <h5 class="mb-3" data-translate="currentSale">Current Sale</h5>
+                <div class="mb-3"><label class="form-label" data-translate="customer">Customer</label><select class="form-select" id="posCustomer"><option value="walkin" data-translate="walkIn" selected="selected">Walk-in Customer</option></select></div>
+                <div class="mb-3"><label class="form-label" data-translate="paymentMethod">Payment Method</label><div class="btn-group w-100"><button type="button" class="btn btn-outline-primary" id="paymentCashBtn">💰 <span data-translate="cash">Cash</span></button><button type="button" class="btn btn-outline-primary" id="paymentTransferBtn">📱 <span data-translate="transfer">Transfer</span></button><button type="button" class="btn btn-outline-primary" id="paymentLoanBtn" style="border-color:#7c3aed;color:#7c3aed;">📋 <span data-translate="loan">Loan</span></button></div></div>
+                <div id="loanDetails" style="display: none;">
+                  <div class="mb-2"><label class="form-label" data-translate="customerName">Customer Name</label><input type="text" class="form-control" id="loanCustomerName"></div>
+                  <div class="mb-2"><label class="form-label" data-translate="phoneNumber">Phone Number</label><input type="text" class="form-control" id="loanPhone"></div>
+                  <div class="mb-2"><label class="form-label" data-translate="expectedPaymentDate">Expected Payment Date</label><input type="date" class="form-control" id="loanExpectedDate"></div>
+                </div>
+                <div id="transferDetails" style="display: none;">
+                  <div class="mb-2"><label class="form-label" data-translate="customerName">Customer Name</label><input type="text" class="form-control" id="transferCustomerName"></div>
+                  <div class="mb-2"><label class="form-label" data-translate="transferReference">Transfer Reference</label><input type="text" class="form-control" id="transferNumber"></div>
+                </div>
+                <div class="mb-3 p-3 rounded" style="background: #f59e0b10; border: 1px solid #f59e0b30;">
+                  <label class="form-label fw-bold" style="color: #f59e0b;" data-translate="laborTransport">🚚 Labor &amp; Transport Cost</label>
+                  <div class="d-flex gap-2 flex-wrap" id="costPercentageBar">
+                    <div class="cost-percentage-btn">2%</div><div class="cost-percentage-btn">5%</div><div class="cost-percentage-btn">10%</div><div class="cost-percentage-btn">15%</div><div class="cost-percentage-btn">20%</div><div class="cost-percentage-btn">25%</div>
+                  </div>
+                  <div class="mt-2 d-flex justify-content-between"><small style="color: #f59e0b;"><span data-translate="selected">Selected:</span> <span id="selectedCostPercent" data-translate="none">None</span></small><small style="color: #f59e0b;"><span data-translate="amount">Amount:</span> <strong id="selectedCostAmount">0 ETB</strong></small></div>
+                </div>
+                <div id="posCart" class="mb-3" style="max-height: 300px; overflow-y: auto;"></div>
+                <div class="border-top pt-3">
+                  <div class="d-flex justify-content-between mb-2"><span data-translate="subtotal">Subtotal:</span><span id="cartSubtotal">0 ETB</span></div>
+                  <div class="d-flex justify-content-between mb-2" style="color: #f59e0b;"><span data-translate="laborCost">Labor Cost:</span><span id="cartCostDisplay">0 ETB</span></div>
+                  <div class="d-flex justify-content-between mb-2"><span data-translate="profit">Profit:</span><span id="cartProfit">0 ETB</span></div>
+                  <div class="d-flex justify-content-between h4"><span data-translate="total">Total:</span><span id="cartTotal">0 ETB</span></div>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                  <button class="btn btn-success" id="completeSaleBtn" disabled="disabled"><i class="bi bi-check-circle"></i> <span data-translate="completeSale">Complete Sale</span></button>
+                  <button class="btn btn-outline-danger" id="clearCartBtn"><i class="bi bi-x-circle"></i> <span data-translate="clearCart">Clear Cart</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sales History -->
+        <div id="sales" class="view d-none">
+          <h2 class="mb-4 page-header" data-translate="salesHistoryTitle">Sales History</h2>
+          <div class="mb-3"><div class="btn-group w-100"><button type="button" class="btn btn-outline-primary active" id="filterAllBtn">📊 <span data-translate="all">All</span></button><button type="button" class="btn btn-outline-primary" id="filterCashBtn">💰 <span data-translate="cash">Cash</span></button><button type="button" class="btn btn-outline-primary" id="filterTransferBtn">📱 <span data-translate="transfer">Transfer</span></button><button type="button" class="btn btn-outline-primary" id="filterLoanBtn" style="border-color:#7c3aed;color:#7c3aed;">📋 <span data-translate="loan">Loan</span></button></div></div>
+          <div class="d-flex justify-content-between align-items-center bg-white rounded p-3 mb-4"><button class="btn btn-outline-primary" id="prevDayBtn">← <span data-translate="previous">Previous</span></button><div class="text-center"><span id="currentDayDisplay" class="fw-bold"></span><span id="dayStatus" class="ms-2 badge bg-success" data-translate="today">Today</span></div><button class="btn btn-outline-primary" id="nextDayBtn"><span data-translate="next">Next</span> →</button></div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="stat-card"><h6 class="text-muted" data-translate="revenue">Revenue</h6><h4 style="color:#0d9488;" id="dailyRevenue">0 ETB</h4></div></div>
+            <div class="col-md-4"><div class="stat-card"><h6 class="text-muted" data-translate="laborCost">Labor Cost:</h6><h4 style="color:#f59e0b;" id="dailyCost">0 ETB</h4></div></div>
+            <div class="col-md-4" id="dailyProfitCard"><div class="stat-card"><h6 class="text-muted" data-translate="netProfit">Net Profit</h6><h4 style="color:#10b981;" id="dailyProfit">0 ETB</h4></div></div>
+          </div>
+          <div class="table-container"><table><thead><tr><th data-translate="time">Time</th><th data-translate="customer">Customer</th><th data-translate="payment">Payment</th><th data-translate="status">Status</th><th data-translate="cost">Cost</th><th data-translate="items">Items</th><th data-translate="total">Total:</th><th id="profitHeader" data-translate="profit">Profit:</th><th id="actionsHeaderSales" data-translate="action">Action</th></tr></thead><tbody id="salesBody"></tbody></table></div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div id="pending-payments" class="view d-none">
+          <h2 class="mb-4 page-header" data-translate="pendingPaymentsTitle">Pending Payments (Loans)</h2>
+          <div class="row g-4 mb-4">
+            <div class="col-md-4"><div class="stat-card"><h6 class="text-muted" data-translate="totalPending">Total Pending</h6><h3 id="totalPendingAmount" style="color:#f59e0b;">0 ETB</h3></div></div>
+            <div class="col-md-4"><div class="stat-card"><h6 class="text-muted" data-translate="pendingCustomers">Pending Customers</h6><h3 id="pendingCustomersCount">0</h3></div></div>
+            <div class="col-md-4"><div class="stat-card"><h6 class="text-muted" data-translate="itemsOnLoan">Items on Loan</h6><h3 id="pendingItemsCount">0</h3></div></div>
+          </div>
+          <div id="pendingPaymentsList"></div>
+        </div>
+
+        <!-- Customers -->
+        <div id="customers" class="view d-none">
+          <h2 class="mb-4 page-header" data-translate="customerDatabase">Customer Database</h2>
+          <button class="btn btn-primary mb-3" id="addCustomerBtn"><i class="bi bi-person-plus"></i> <span data-translate="addCustomer">Add Customer</span></button>
+          <div class="row mb-4"><div class="col-md-6"><input type="text" class="form-control" id="searchCustomer" data-translate-placeholder="searchCustomers" placeholder="Search customers..."></div></div>
+          <div class="table-container"><table><thead><tr><th data-translate="name">Name</th><th data-translate="phone">Phone</th><th data-translate="totalPurchases">Total Purchases</th><th data-translate="lastPurchase">Last Purchase</th><th data-translate="actions">Actions</th></tr></thead><tbody id="customersBody"></tbody></table></div>
+        </div>
+
+        <!-- Categories & Types -->
+        <div id="categories" class="view d-none">
+          <h2 class="mb-4 page-header" data-translate="manageCategories">Manage Categories &amp; Types</h2>
+          <div class="row">
+            <div class="col-md-6"><div class="form-card"><h5 class="mb-3" data-translate="categories">Categories</h5><div id="categoriesList" class="list-group mb-3"></div><button class="btn btn-outline-primary w-100" id="addCategoryBtn"><i class="bi bi-plus-circle"></i> <span data-translate="addCategory">Add Category</span></button></div></div>
+            <div class="col-md-6"><div class="form-card"><h5 class="mb-3" data-translate="productTypes">Product Types</h5><div id="typesList" class="list-group mb-3"></div><button class="btn btn-warning w-100" id="addTypeBtn" style="background:#f59e0b;color:white;border:none;"><i class="bi bi-plus-circle"></i> <span data-translate="addType">Add Type</span></button></div></div>
+          </div>
+        </div>
+
+        <!-- Security & Backup -->
+        <div id="security" class="view d-none">
+          <h2 class="mb-4 page-header" data-translate="securityBackupTitle">Security &amp; Backup</h2>
+          <div class="row g-4">
+            <div class="col-md-6"><div class="form-card text-center"><i class="bi bi-download display-1 text-success"></i><h4 class="mt-3" data-translate="exportData">Export Data</h4><p class="text-muted" data-translate="downloadBackup">Download JSON backup</p><button class="btn btn-success w-100" id="exportBtn"><i class="bi bi-file-earmark-arrow-down"></i> <span data-translate="exportJSON">Export JSON</span></button></div></div>
+            <div class="col-md-6"><div class="form-card text-center"><i class="bi bi-upload display-1 text-primary"></i><h4 class="mt-3" data-translate="importData">Import Data</h4><p class="text-muted" data-translate="restoreBackup">Restore from JSON</p><input type="file" id="importFile" accept=".json" style="display: none;"><button class="btn btn-primary w-100" id="importBtn"><i class="bi bi-file-earmark-arrow-up"></i> <span data-translate="importJSON">Import JSON</span></button></div></div>
+            <div class="col-md-6"><div class="form-card text-center"><i class="bi bi-cloud-upload display-1 text-info"></i><h4 class="mt-3" data-translate="cloudBackup">Cloud Backup</h4><p class="text-muted" data-translate="firebaseStorage">Firebase Storage</p><div class="d-grid gap-2"><button class="btn btn-success" id="uploadCloudBtn"><span data-translate="uploadCloud">Upload to Cloud</span></button><button class="btn btn-outline-primary" id="downloadCloudBtn"><span data-translate="downloadCloud">Download from Cloud</span></button></div></div></div>
+            <div class="col-md-6"><div class="form-card text-center"><i class="bi bi-arrow-repeat display-1 text-danger"></i><h4 class="mt-3" data-translate="factoryReset">Factory Reset</h4><p class="text-muted" data-translate="deleteSales">Delete all sales history</p><button class="btn btn-danger w-100" id="factoryResetBtn"><i class="bi bi-exclamation-triangle"></i> <span data-translate="resetSales">Reset Sales Data</span></button></div></div>
+          </div>
+          <div class="form-card mt-4" style="border: 3px solid #7c3aed;">
+            <h4 style="color:#7c3aed;"><i class="bi bi-key-fill"></i> <span data-translate="changePassword">Change Admin Password</span></h4>
+            <div class="row g-3">
+              <div class="col-md-4"><label class="form-label" data-translate="currentPassword">Current Password</label><input type="password" class="form-control" id="currentPassword"></div>
+              <div class="col-md-4"><label class="form-label" data-translate="newPassword">New Password</label><input type="password" class="form-control" id="newPassword"></div>
+              <div class="col-md-4"><label class="form-label" data-translate="confirmPassword">Confirm Password</label><input type="password" class="form-control" id="confirmNewPassword"></div>
+            </div>
+            <button class="btn w-100 mt-3" id="updatePasswordBtn" style="background:#7c3aed;color:white;"><i class="bi bi-shield-check"></i> <span data-translate="updatePassword">Update Password</span></button>
+            <div id="passwordChangeMsg" class="mt-2 text-center" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal fade" id="orderDetailModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" data-translate="orderDetails">Order Details</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="orderDetailContent"></div></div></div></div>
+  <div class="modal fade" id="customerHistoryModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" data-translate="customerHistory">Customer History</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="customerHistoryContent"></div></div></div></div>
+
+  <script>
+    // ============================================
+    // TRANSLATIONS OBJECT
+    // ============================================
+    const translations = {
+      en: {
+        billiardSupply: "BILLIARD SUPPLY",
+        selectRole: "SELECT ROLE TO LOGIN",
+        admin: "ADMIN",
+        fullAccess: "Full System Access",
+        cashier: "CASHIER",
+        salesOnly: "Sales Only",
+        adminPassword: "🔐 Admin Password",
+        enterPassword: "Enter admin password",
+        wrongPassword: "❌ Incorrect password! Please try again.",
+        loginSystem: "LOGIN TO SYSTEM",
+        logout: "LOGOUT",
+        menu: "Menu",
+        synced: "Synced",
+        dashboard: "Dashboard",
+        inventory: "Inventory",
+        addProduct: "Add Product",
+        pos: "Point of Sale",
+        salesHistory: "Sales History",
+        pendingPayments: "Pending Payments",
+        customers: "Customers",
+        categoriesTypes: "Categories & Types",
+        securityBackup: "Security & Backup",
+        dashboardTitle: "Dashboard - ምስጌ ፑል",
+        todayRevenue: "Today's Revenue",
+        todayCost: "Today's Cost",
+        todayProfit: "Today's Profit",
+        totalProducts: "Total Products",
+        lowStock: "Low Stock Items",
+        allTimeRevenue: "All Time Revenue",
+        allTimeProfit: "All Time Profit",
+        pendingAmount: "Pending Payments",
+        lowStockAlert: "⚠️ Low Stock Alert (Below 5 units)",
+        product: "Product",
+        stock: "Stock",
+        action: "Action",
+        inventoryManagement: "Inventory Management",
+        totalStockValue: "💰 Total Stock Value",
+        searchProducts: "Search products...",
+        allTypes: "All Types",
+        allCategories: "All Categories",
+        type: "Type",
+        category: "Category",
+        sizeDetail: "Size/Detail",
+        cost: "Cost",
+        stockValue: "Stock Value",
+        actions: "Actions",
+        addNewProduct: "Add New Product",
+        productType: "Type (ዓይነት)",
+        selectType: "Select Type",
+        productName: "Product Name",
+        selectCategory: "Select Category",
+        costPrice: "Cost Price (ETB)",
+        quantity: "Quantity",
+        enterStock: "Enter initial stock quantity",
+        saveProduct: "Save Product",
+        cancelEdit: "Cancel Edit",
+        quickTips: "📌 Quick Tips",
+        tipSellingPrice: "Selling price is set during sale",
+        tipCategories: "Create categories and types first",
+        tipLowStock: "Low stock alert at 5 units",
+        posTitle: "Point of Sale",
+        filterByType: "Filter by Type:",
+        chooseCategory: "Choose a category to see products",
+        currentSale: "Current Sale",
+        customer: "Customer",
+        walkIn: "Walk-in Customer",
+        paymentMethod: "Payment Method",
+        cash: "Cash",
+        transfer: "Transfer",
+        loan: "Loan",
+        customerName: "Customer Name",
+        phoneNumber: "Phone Number",
+        expectedPaymentDate: "Expected Payment Date",
+        transferReference: "Transfer Reference",
+        laborTransport: "🚚 Labor & Transport Cost",
+        selected: "Selected:",
+        none: "None",
+        amount: "Amount:",
+        subtotal: "Subtotal:",
+        laborCost: "Labor Cost:",
+        profit: "Profit:",
+        total: "Total:",
+        completeSale: "Complete Sale",
+        clearCart: "Clear Cart",
+        salesHistoryTitle: "Sales History",
+        all: "All",
+        previous: "Previous",
+        today: "Today",
+        next: "Next",
+        revenue: "Revenue",
+        netProfit: "Net Profit",
+        time: "Time",
+        payment: "Payment",
+        status: "Status",
+        items: "Items",
+        pendingPaymentsTitle: "Pending Payments (Loans)",
+        totalPending: "Total Pending",
+        pendingCustomers: "Pending Customers",
+        itemsOnLoan: "Items on Loan",
+        customerDatabase: "Customer Database",
+        addCustomer: "Add Customer",
+        searchCustomers: "Search customers...",
+        name: "Name",
+        phone: "Phone",
+        totalPurchases: "Total Purchases",
+        lastPurchase: "Last Purchase",
+        manageCategories: "Manage Categories & Types",
+        categories: "Categories",
+        addCategory: "Add Category",
+        productTypes: "Product Types",
+        addType: "Add Type",
+        securityBackupTitle: "Security & Backup",
+        exportData: "Export Data",
+        downloadBackup: "Download JSON backup",
+        exportJSON: "Export JSON",
+        importData: "Import Data",
+        restoreBackup: "Restore from JSON",
+        importJSON: "Import JSON",
+        cloudBackup: "Cloud Backup",
+        firebaseStorage: "Firebase Storage",
+        uploadCloud: "Upload to Cloud",
+        downloadCloud: "Download from Cloud",
+        factoryReset: "Factory Reset",
+        deleteSales: "Delete all sales history",
+        resetSales: "Reset Sales Data",
+        changePassword: "Change Admin Password",
+        currentPassword: "Current Password",
+        newPassword: "New Password",
+        confirmPassword: "Confirm Password",
+        updatePassword: "Update Password",
+        orderDetails: "Order Details",
+        customerHistory: "Customer History",
+        noProducts: "No products",
+        allStockOK: "All stock OK",
+        cartEmpty: "Cart is empty",
+        notAllowed: "You do not have permission to access this page."
+      },
+      am: {
+        billiardSupply: "የቢሊያርድ አቅርቦት",
+        selectRole: "ለመግባት ሚና ይምረጡ",
+        admin: "አስተዳዳሪ",
+        fullAccess: "ሙሉ የስርዓት መዳረሻ",
+        cashier: "ሻጭ",
+        salesOnly: "ሽያጭ ብቻ",
+        adminPassword: "🔐 የአስተዳዳሪ የይለፍ ቃል",
+        enterPassword: "የአስተዳዳሪ የይለፍ ቃል ያስገቡ",
+        wrongPassword: "❌ የተሳሳተ የይለፍ ቃል! እባክዎ እንደገና ይሞክሩ።",
+        loginSystem: "ወደ ስርዓት ይግቡ",
+        logout: "ውጣ",
+        menu: "ምናሌ",
+        synced: "ተመሳስሏል",
+        dashboard: "ዳሽቦርድ",
+        inventory: "ክምችት",
+        addProduct: "ምርት ጨምር",
+        pos: "የሽያጭ ነጥብ",
+        salesHistory: "የሽያጭ ታሪክ",
+        pendingPayments: "ያልተከፈሉ ክፍያዎች",
+        customers: "ደንበኞች",
+        categoriesTypes: "ምድቦች እና ዓይነቶች",
+        securityBackup: "ደህንነት እና ምትኬ",
+        dashboardTitle: "ዳሽቦርድ - ምስጌ ፑል",
+        todayRevenue: "የዛሬ ገቢ",
+        todayCost: "የዛሬ ወጪ",
+        todayProfit: "የዛሬ ትርፍ",
+        totalProducts: "ጠቅላላ ምርቶች",
+        lowStock: "ዝቅተኛ ክምችት",
+        allTimeRevenue: "ጠቅላላ ገቢ",
+        allTimeProfit: "ጠቅላላ ትርፍ",
+        pendingAmount: "ያልተከፈሉ ክፍያዎች",
+        lowStockAlert: "⚠️ ዝቅተኛ ክምችት ማስጠንቀቂያ (ከ5 በታች)",
+        product: "ምርት",
+        stock: "ክምችት",
+        action: "እርምጃ",
+        inventoryManagement: "የክምችት አስተዳደር",
+        totalStockValue: "💰 ጠቅላላ የክምችት ዋጋ",
+        searchProducts: "ምርቶችን ይፈልጉ...",
+        allTypes: "ሁሉም ዓይነቶች",
+        allCategories: "ሁሉም ምድቦች",
+        type: "ዓይነት",
+        category: "ምድብ",
+        sizeDetail: "መጠን/ዝርዝር",
+        cost: "ዋጋ",
+        stockValue: "የክምችት ዋጋ",
+        actions: "እርምጃዎች",
+        addNewProduct: "አዲስ ምርት ጨምር",
+        productType: "ዓይነት",
+        selectType: "ዓይነት ይምረጡ",
+        productName: "የምርት ስም",
+        selectCategory: "ምድብ ይምረጡ",
+        costPrice: "የዋጋ መጠን (ETB)",
+        quantity: "ብዛት",
+        enterStock: "የመጀመሪያ ክምችት ብዛት ያስገቡ",
+        saveProduct: "ምርት አስቀምጥ",
+        cancelEdit: "ማስተካከያ ሰርዝ",
+        quickTips: "📌 ፈጣን ምክሮች",
+        tipSellingPrice: "የሽያጭ ዋጋ በሚሸጥበት ጊዜ ይወሰናል",
+        tipCategories: "መጀመሪያ ምድቦች እና ዓይነቶች ይፍጠሩ",
+        tipLowStock: "ከ5 ክምችት በታች ማስጠንቀቂያ",
+        posTitle: "የሽያጭ ነጥብ",
+        filterByType: "በዓይነት አጣራ:",
+        chooseCategory: "ምርቶችን ለማየት ምድብ ይምረጡ",
+        currentSale: "የአሁን ሽያጭ",
+        customer: "ደንበኛ",
+        walkIn: "የመጡ ደንበኛ",
+        paymentMethod: "የክፍያ ዘዴ",
+        cash: "ጥሬ ገንዘብ",
+        transfer: "ትራንስፈር",
+        loan: "ብድር",
+        customerName: "የደንበኛ ስም",
+        phoneNumber: "ስልክ ቁጥር",
+        expectedPaymentDate: "የሚጠበቀው የክፍያ ቀን",
+        transferReference: "የትራንስፈር ማጣቀሻ",
+        laborTransport: "🚚 የጉልበት እና የትራንስፖርት ወጪ",
+        selected: "የተመረጠ:",
+        none: "ምንም",
+        amount: "መጠን:",
+        subtotal: "ንዑስ ድምር:",
+        laborCost: "የጉልበት ወጪ:",
+        profit: "ትርፍ:",
+        total: "ጠቅላላ:",
+        completeSale: "ሽያጭ ጨርስ",
+        clearCart: "ጋሪ አጽዳ",
+        salesHistoryTitle: "የሽያጭ ታሪክ",
+        all: "ሁሉም",
+        previous: "ቀዳሚ",
+        today: "ዛሬ",
+        next: "ቀጣይ",
+        revenue: "ገቢ",
+        netProfit: "የተጣራ ትርፍ",
+        time: "ሰዓት",
+        payment: "ክፍያ",
+        status: "ሁኔታ",
+        items: "ዕቃዎች",
+        pendingPaymentsTitle: "ያልተከፈሉ ክፍያዎች (ብድሮች)",
+        totalPending: "ጠቅላላ ያልተከፈለ",
+        pendingCustomers: "ያልከፈሉ ደንበኞች",
+        itemsOnLoan: "በብድር የተሰጡ ዕቃዎች",
+        customerDatabase: "የደንበኞች ዳታቤዝ",
+        addCustomer: "ደንበኛ ጨምር",
+        searchCustomers: "ደንበኞችን ይፈልጉ...",
+        name: "ስም",
+        phone: "ስልክ",
+        totalPurchases: "ጠቅላላ ግዢዎች",
+        lastPurchase: "የመጨረሻ ግዢ",
+        manageCategories: "ምድቦችን እና ዓይነቶችን አስተዳድር",
+        categories: "ምድቦች",
+        addCategory: "ምድብ ጨምር",
+        productTypes: "የምርት ዓይነቶች",
+        addType: "ዓይነት ጨምር",
+        securityBackupTitle: "ደህንነት እና ምትኬ",
+        exportData: "ውሂብ ላክ",
+        downloadBackup: "JSON ምትኬ አውርድ",
+        exportJSON: "JSON ላክ",
+        importData: "ውሂብ አስመጣ",
+        restoreBackup: "ከJSON እነበረበት መልስ",
+        importJSON: "JSON አስመጣ",
+        cloudBackup: "የክላውድ ምትኬ",
+        firebaseStorage: "Firebase ማከማቻ",
+        uploadCloud: "ወደ ክላውድ ላክ",
+        downloadCloud: "ከክላውድ አውርድ",
+        factoryReset: "ፋብሪካ ዳግም አስጀምር",
+        deleteSales: "ሁሉንም የሽያጭ ታሪክ ሰርዝ",
+        resetSales: "የሽያጭ ውሂብ ዳግም አስጀምር",
+        changePassword: "የአስተዳዳሪ የይለፍ ቃል ቀይር",
+        currentPassword: "የአሁኑ የይለፍ ቃል",
+        newPassword: "አዲስ የይለፍ ቃል",
+        confirmPassword: "የይለፍ ቃል አረጋግጥ",
+        updatePassword: "የይለፍ ቃል አዘምን",
+        orderDetails: "የትዕዛዝ ዝርዝሮች",
+        customerHistory: "የደንበኛ ታሪክ",
+        noProducts: "ምርቶች የሉም",
+        allStockOK: "ሁሉም ክምችት ደህና ነው",
+        cartEmpty: "ጋሪ ባዶ ነው",
+        notAllowed: "ይህን ገጽ ለማየት ፈቃድ የለዎትም።"
+      }
+    };
+
+    // ============================================
+    // FIREBASE INITIALIZATION
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxf3eBLKLk4JDY96abI2P3fovfhWm8Vb0",
+      authDomain: "misge-marble.firebaseapp.com",
+      projectId: "misge-marble",
+      storageBucket: "misge-marble.firebasestorage.app",
+      messagingSenderId: "601629343079",
+      appId: "1:601629343079:web:364d37f04fb9dd709903c2"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    const BUSINESS_ID = "misgepool_mekele_001";
+    
+    let isOnline = navigator.onLine;
+    let isSyncing = false;
+    let unsubscribeListeners = [];
+    let syncTimer;
+    let currentUser = null;
+    let selectedRole = null;
+    let adminPassword = localStorage.getItem('misgepool_admin_password') || 'admin123';
+    let editingProductId = null;
+    let currentDayOffset = 0;
+    let currentPaymentFilter = 'all';
+    let currentCart = [];
+    let currentCostPercentage = null;
+    let currentPaymentMethod = null;
+    let selectedPOSCategory = null;
+    let selectedPOSType = null;
+    let currentLang = localStorage.getItem('misgepool_language') || 'en';
+    
+    let inventory = JSON.parse(localStorage.getItem('misgepool_inventory')) || [];
+    let sales = JSON.parse(localStorage.getItem('misgepool_sales')) || [];
+    let customers = JSON.parse(localStorage.getItem('misgepool_customers')) || [];
+    let categories = JSON.parse(localStorage.getItem('misgepool_categories')) || ['Pool Table', 'Slate Stone', 'Billiard Balls', 'Cue Sticks', 'Table Cloth', 'Pockets', 'Cushions', 'Accessories', 'Other'];
+    let productTypes = JSON.parse(localStorage.getItem('misgepool_productTypes')) || ['Pool', 'Karambula'];
+
+    // ============================================
+    // HELPER: Check if current user is admin
+    // ============================================
+    function isAdmin() {
+      return currentUser && currentUser.role === 'admin';
+    }
+
+    // ============================================
+    // TRANSLATION FUNCTION
+    // ============================================
+    function translatePage(lang) {
+      currentLang = lang;
+      localStorage.setItem('misgepool_language', lang);
+      
+      document.getElementById('langEnBtn').style.background = lang === 'en' ? '#14b8a6' : '';
+      document.getElementById('langAmBtn').style.background = lang === 'am' ? '#14b8a6' : '';
+      
+      const t = translations[lang];
+      
+      document.querySelectorAll('[data-translate]').forEach(el => {
+        const key = el.getAttribute('data-translate');
+        if (t[key]) {
+          const text = el.textContent;
+          const iconMatch = text.match(/^[🔐💰📌🚚⚠️📊📋📱❌✅📞📅🎱🔑✏️🔄]/);
+          const icon = iconMatch ? iconMatch[0] + ' ' : '';
+          el.textContent = icon + t[key];
+        }
+      });
+      
+      document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-translate-placeholder');
+        if (t[key]) {
+          el.placeholder = t[key];
+        }
+      });
+      
+      document.querySelectorAll('option[data-translate]').forEach(el => {
+        const key = el.getAttribute('data-translate');
+        if (t[key]) {
+          el.textContent = t[key];
+        }
+      });
+      
+      const sidebarSub = document.getElementById('sidebarSubtitle');
+      if (sidebarSub && t.billiardSupply) sidebarSub.textContent = t.billiardSupply;
+      
+      const loginSubs = document.querySelectorAll('.login-card .subtitle');
+      if (loginSubs.length >= 2 && t.billiardSupply) loginSubs[1].textContent = t.billiardSupply;
+      
+      const syncText = document.getElementById('syncText');
+      if (syncText) {
+        const currentStatus = document.getElementById('syncStatus');
+        if (currentStatus && currentStatus.classList.contains('online')) syncText.textContent = t.synced;
+        else if (currentStatus && currentStatus.classList.contains('offline')) syncText.textContent = lang === 'am' ? 'ከመስመር ውጪ' : 'Offline';
+        else syncText.textContent = lang === 'am' ? 'በመመሳሰል ላይ...' : 'Syncing...';
+      }
+      
+      updateCurrentView();
+    }
+    
+    function updateCurrentView() {
+      const views = document.querySelectorAll('.view');
+      views.forEach(view => {
+        if (!view.classList.contains('d-none')) {
+          const viewId = view.id;
+          switch(viewId) {
+            case 'dashboard': updateDashboard(); break;
+            case 'inventory': renderInventory(); break;
+            case 'pos': renderPOS(); break;
+            case 'sales': loadSalesForDay(); break;
+            case 'pending-payments': renderPendingPayments(); break;
+            case 'customers': renderCustomers(); break;
+            case 'categories': renderCategoriesAndTypes(); break;
+            case 'add-product': loadSelects(); toggleTypeField(); break;
+          }
+        }
+      });
+    }
+
+    function setLanguage(lang) {
+      translatePage(lang);
+    }
+
+    // ============================================
+    // EDIT MODE MANAGEMENT
+    // ============================================
+    function resetToAddMode() {
+      editingProductId = null;
+      document.getElementById('productForm').reset();
+      document.getElementById('typeFieldContainer').style.display = 'none';
+      document.getElementById('productSubmitText').textContent = 
+        currentLang === 'am' ? 'ምርት አስቀምጥ' : 'Save Product';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      document.getElementById('costHelp').style.display = 'none';
+      document.getElementById('quantityHelp').textContent = 
+        currentLang === 'am' ? 'የመጀመሪያ ክምችት ብዛት ያስገቡ' : 'Enter initial stock quantity';
+      document.getElementById('productName').removeAttribute('readonly');
+      document.getElementById('productTypeSelect').removeAttribute('disabled');
+      document.getElementById('productCategory').removeAttribute('disabled');
+      document.getElementById('productTypeDetail').removeAttribute('readonly');
+      document.getElementById('productQuantity').value = 1;
+      document.getElementById('productQuantity').min = 0;
+    }
+
+    // ============================================
+    // INVENTORY - INLINE EDITING
+    // ============================================
+    function renderInventory() {
+      const t = translations[currentLang];
+      const search = (document.getElementById('searchInventory')?.value || '').toLowerCase();
+      const catF = document.getElementById('filterCategory')?.value || 'all';
+      const typeF = document.getElementById('filterProductType')?.value || 'all';
+      let filtered = inventory.filter(function(item) {
+        return item.name.toLowerCase().includes(search) && (catF === 'all' || item.category === catF) && (typeF === 'all' || item.productType === typeF);
+      });
+      const isCashierView = !isAdmin();
+      
+      // Show/hide Total Stock Value banner
+      document.getElementById('totalStockValueBanner').style.display = isCashierView ? 'none' : 'block';
+      
+      // Show/hide Add Product button
+      document.getElementById('addProductBtnTop').style.display = isCashierView ? 'none' : 'inline-block';
+      
+      // Show/hide table headers
+      document.getElementById('stockValueHeader').style.display = isCashierView ? 'none' : '';
+      document.getElementById('actionsHeader').style.display = isCashierView ? 'none' : '';
+      
+      document.getElementById('inventoryBody').innerHTML = filtered.map(function(item) {
+        const sv = item.quantity * item.cost;
+        const lowStockClass = item.quantity < 5 ? 'low-stock-warning' : '';
+        
+        // Cost and Stock inputs - readonly for cashier
+        const costInput = isCashierView ? 
+          '<span>' + item.cost.toLocaleString() + ' ETB</span>' :
+          '<input type="number" class="inline-edit-input cost-input" value="' + item.cost + '" min="0" step="1" data-id="' + item.id + '" onchange="updateProductField(' + item.id + ', \'cost\', this.value)">';
+        
+        const stockInput = isCashierView ? 
+          '<span class="badge ' + (item.quantity < 5 ? 'badge-danger' : 'badge-success') + '">' + item.quantity + '</span>' :
+          '<input type="number" class="inline-edit-input stock-input" value="' + item.quantity + '" min="0" step="1" data-id="' + item.id + '" onchange="updateProductField(' + item.id + ', \'stock\', this.value)">';
+        
+        // Stock Value column - hidden for cashier
+        const stockValueCol = isCashierView ? '' : '<td><span class="stock-value-display" id="stock-value-' + item.id + '">' + sv.toLocaleString() + ' ETB</span></td>';
+        
+        // Actions column - hidden for cashier
+        const actionsCol = isCashierView ? '' : '<td><button class="btn btn-sm btn-danger" onclick="deleteProduct(' + item.id + ')"><i class="bi bi-trash"></i></button></td>';
+        
+        return '<tr class="' + lowStockClass + '" data-product-id="' + item.id + '">' +
+          '<td>' + item.name + '</td>' +
+          '<td><span class="badge badge-cost">' + (item.productType || '-') + '</span></td>' +
+          '<td><span class="badge badge-info">' + item.category + '</span></td>' +
+          '<td>' + (item.typeDetail || '-') + '</td>' +
+          '<td>' + costInput + '</td>' +
+          '<td>' + stockInput + '</td>' +
+          stockValueCol +
+          actionsCol +
+          '</tr>';
+      }).join('') || '<tr><td colspan="' + (isCashierView ? '6' : '8') + '" class="text-center">' + t.noProducts + '</td></tr>';
+      
+      updateTotalStockValue();
+    }
+
+    function updateProductField(id, field, value) {
+      if (!isAdmin()) return; // Extra safety check
+      
+      const product = inventory.find(p => p.id === id);
+      if (!product) return;
+      
+      const newVal = parseFloat(value);
+      if (isNaN(newVal) || newVal < 0) return;
+      
+      if (field === 'cost') {
+        product.cost = newVal;
+      } else if (field === 'stock') {
+        const oldQty = product.quantity;
+        const diff = newVal - oldQty;
+        if (diff < 0) {
+          if (!confirm(currentLang === 'am' ? 'ክምችት ለመቀነስ እርግጠኛ ነዎት? (ከ ' + oldQty + ' ወደ ' + newVal + ')' : 'Are you sure you want to reduce stock? (from ' + oldQty + ' to ' + newVal + ')')) {
+            document.querySelector('.stock-input[data-id="' + id + '"]').value = oldQty;
+            return;
+          }
+        }
+        product.quantity = newVal;
+      }
+      
+      saveInventory();
+      debounceSync();
+      updateDashboard();
+      
+      const sv = product.quantity * product.cost;
+      const svElement = document.getElementById('stock-value-' + id);
+      if (svElement) {
+        svElement.textContent = sv.toLocaleString() + ' ETB';
+      }
+      
+      updateTotalStockValue();
+      renderInventory();
+    }
+
+    function updateTotalStockValue() {
+      const total = inventory.reduce(function(s, i) { return s + i.quantity * i.cost; }, 0);
+      const el = document.getElementById('totalStockValue');
+      if (el) el.textContent = total.toLocaleString() + ' ETB';
+    }
+
+    function deleteProduct(id) {
+      if (!isAdmin()) return;
+      const confirmMsg = currentLang === 'am' ? 'ሰርዝ?' : 'Delete?';
+      if (confirm(confirmMsg)) {
+        inventory = inventory.filter(function(p) { return p.id !== id; });
+        saveAll();
+        renderInventory();
+        updateDashboard();
+      }
+    }
+
+    // ============================================
+    // ADD PRODUCT
+    // ============================================
+    function addNewProduct() {
+      const t = translations[currentLang];
+      const type = document.getElementById('productTypeSelect').value;
+      const name = document.getElementById('productName').value.trim();
+      const cat = document.getElementById('productCategory').value;
+      const detail = document.getElementById('productTypeDetail').value.trim();
+      const cost = parseFloat(document.getElementById('productCost').value);
+      const qty = parseInt(document.getElementById('productQuantity').value);
+      
+      const fillMsg = currentLang === 'am' ? 'ሁሉንም መስኮች ይሙሉ።' : 'Fill all fields.';
+      
+      if (!type || !name || !cat || isNaN(cost) || isNaN(qty) || qty < 1) {
+        alert(fillMsg);
+        return;
+      }
+      
+      let displayName = name;
+      if (detail) displayName += ' - ' + detail;
+      
+      const ex = inventory.findIndex(item => 
+        item.name.toLowerCase() === displayName.toLowerCase() && item.cost === cost
+      );
+      
+      if (ex !== -1) {
+        inventory[ex].quantity += qty;
+        alert(currentLang === 'am' ? '✅ ክምችት ተጨምሯል!' : '✅ Stock added to existing product!');
+      } else {
+        inventory.push({
+          id: Date.now(),
+          name: displayName,
+          originalName: name,
+          productType: type,
+          category: cat,
+          typeDetail: detail,
+          cost: cost,
+          quantity: qty,
+          costHistory: []
+        });
+        alert(currentLang === 'am' ? '✅ ምርት ተቀምጧል!' : '✅ Product Saved!');
+      }
+      
+      saveAll();
+      document.getElementById('productForm').reset();
+      document.getElementById('typeFieldContainer').style.display = 'none';
+      showView('inventory');
+      updateDashboard();
+    }
+
+    function toggleTypeField() {
+      const cat = document.getElementById('productCategory').value;
+      const container = document.getElementById('typeFieldContainer');
+      container.style.display = cat ? 'block' : 'none';
+      if (!cat) document.getElementById('productTypeDetail').value = '';
+    }
+
+    // ============================================
+    // FORM SUBMIT HANDLER
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('productForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addNewProduct();
+      });
+    });
+
+    // ============================================
+    // SAVE FUNCTIONS
+    // ============================================
+    function saveInventory() { localStorage.setItem('misgepool_inventory', JSON.stringify(inventory)); }
+    function saveSales() { localStorage.setItem('misgepool_sales', JSON.stringify(sales)); }
+    function saveCustomers() { localStorage.setItem('misgepool_customers', JSON.stringify(customers)); }
+    function saveCategories() { localStorage.setItem('misgepool_categories', JSON.stringify(categories)); }
+    function saveProductTypes() { localStorage.setItem('misgepool_productTypes', JSON.stringify(productTypes)); }
+    function saveAllLocal() { saveInventory(); saveSales(); saveCustomers(); saveCategories(); saveProductTypes(); }
+    function saveAll() { saveAllLocal(); debounceSync(); }
+
+    // ============================================
+    // FIREBASE SYNC
+    // ============================================
+    function updateSyncStatus(status) {
+      const el = document.getElementById('syncStatus');
+      const txt = document.getElementById('syncText');
+      if (!el) return;
+      el.className = 'sync-indicator ' + status;
+      if (txt) {
+        const t = translations[currentLang];
+        if (status === 'online') txt.textContent = t.synced;
+        else if (status === 'offline') txt.textContent = currentLang === 'am' ? 'ከመስመር ውጪ' : 'Offline';
+        else txt.textContent = currentLang === 'am' ? 'በመመሳሰል ላይ...' : 'Syncing...';
+      }
+    }
+    
+    function debounceSync() {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(syncToCloud, 1500);
+    }
+    
+    async function syncToCloud() {
+      if (!isOnline || isSyncing || !currentUser) return;
+      isSyncing = true;
+      updateSyncStatus('syncing');
+      try {
+        const br = db.collection('businesses').doc(BUSINESS_ID);
+        await Promise.all([
+          br.collection('inventory').doc('data').set({ items: inventory, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }),
+          br.collection('sales').doc('data').set({ items: sales, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }),
+          br.collection('customers').doc('data').set({ items: customers, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }),
+          br.collection('metadata').doc('config').set({ categories, productTypes, adminPassword, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() })
+        ]);
+        updateSyncStatus('online');
+      } catch(e) { console.error('Sync error:', e); updateSyncStatus('offline'); }
+      isSyncing = false;
+    }
+    
+    async function loadFromCloud() {
+      if (!isOnline) return false;
+      try {
+        const br = db.collection('businesses').doc(BUSINESS_ID);
+        const [invDoc, salesDoc, custDoc, metaDoc] = await Promise.all([
+          br.collection('inventory').doc('data').get(),
+          br.collection('sales').doc('data').get(),
+          br.collection('customers').doc('data').get(),
+          br.collection('metadata').doc('config').get()
+        ]);
+        if (invDoc.exists) inventory = invDoc.data().items || [];
+        if (salesDoc.exists) sales = salesDoc.data().items || [];
+        if (custDoc.exists) customers = custDoc.data().items || [];
+        if (metaDoc.exists) {
+          const d = metaDoc.data();
+          if (d.categories) categories = d.categories;
+          if (d.productTypes) productTypes = d.productTypes;
+          if (d.adminPassword) adminPassword = d.adminPassword;
+        }
+        saveAllLocal();
+        return true;
+      } catch(e) { console.error('Load error:', e); return false; }
+    }
+    
+    function setupRealTimeListeners() {
+      const br = db.collection('businesses').doc(BUSINESS_ID);
+      unsubscribeListeners.push(
+        br.collection('inventory').doc('data').onSnapshot(function(doc) {
+          if (doc.exists) { inventory = doc.data().items || []; saveInventory(); if (!document.getElementById('inventory').classList.contains('d-none')) renderInventory(); updateDashboard(); }
+        })
+      );
+      unsubscribeListeners.push(
+        br.collection('sales').doc('data').onSnapshot(function(doc) {
+          if (doc.exists) { sales = doc.data().items || []; saveSales(); if (!document.getElementById('sales').classList.contains('d-none')) loadSalesForDay(); updateDashboard(); }
+        })
+      );
+    }
+    
+    async function uploadBackupToCloud() {
+      if (!isOnline) { alert(currentLang === 'am' ? 'ከመስመር ውጪ!' : 'Offline!'); return; }
+      try {
+        const data = { inventory, sales, customers, categories, productTypes, adminPassword, exportDate: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        await storage.ref('backups/' + BUSINESS_ID + '/' + Date.now() + '.json').put(blob);
+        alert(currentLang === 'am' ? '✅ ምትኬ ተልኳል!' : '✅ Backup uploaded!');
+      } catch(e) { alert((currentLang === 'am' ? 'መላክ አልተሳካም: ' : 'Upload failed: ') + e.message); }
+    }
+    
+    async function downloadBackupFromCloud() {
+      if (!isOnline) { alert(currentLang === 'am' ? 'ከመስመር ውጪ!' : 'Offline!'); return; }
+      try {
+        const list = await storage.ref('backups/' + BUSINESS_ID).listAll();
+        if (list.items.length === 0) { alert(currentLang === 'am' ? 'ምንም የክላውድ ምትኬ አልተገኘም።' : 'No cloud backups found.'); return; }
+        const url = await list.items[list.items.length - 1].getDownloadURL();
+        const response = await fetch(url);
+        const data = await response.json();
+        if (confirm(currentLang === 'am' ? 'ከክላውድ ምትኬ እነበረበት መልስ?' : 'Restore from cloud backup?')) {
+          if (data.inventory) inventory = data.inventory;
+          if (data.sales) sales = data.sales;
+          if (data.customers) customers = data.customers;
+          if (data.categories) categories = data.categories;
+          if (data.productTypes) productTypes = data.productTypes;
+          if (data.adminPassword) { adminPassword = data.adminPassword; localStorage.setItem('misgepool_admin_password', adminPassword); }
+          saveAll();
+          alert(currentLang === 'am' ? '✅ ተመልሷል!' : '✅ Restored!');
+          location.reload();
+        }
+      } catch(e) { alert((currentLang === 'am' ? 'ማውረድ አልተሳካም: ' : 'Download failed: ') + e.message); }
+    }
+
+    // ============================================
+    // ETHIOPIAN CALENDAR
+    // ============================================
+    const ethMonths = ['መስከረም', 'ጥቅምት', 'ኅዳር', 'ታኅሣሥ', 'ጥር', 'የካቲት', 'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜ'];
+    function gregorianToEthiopian(date) {
+      const jdn = Math.floor((date - new Date(1970, 0, 1)) / 86400000) + 2440588;
+      const ethJdn = jdn - 1724220;
+      let ethYear = Math.floor(ethJdn / 365.25) + 1;
+      let daysIntoYear = ethJdn - Math.floor((ethYear - 1) * 365.25);
+      let isLeap = (ethYear % 4 === 3);
+      let daysInYear = isLeap ? 366 : 365;
+      if (daysIntoYear > daysInYear) { ethYear++; daysIntoYear -= daysInYear; }
+      let ethMonth = 1, ethDay = daysIntoYear;
+      while (ethMonth <= 12 && ethDay > 30) { ethDay -= 30; ethMonth++; }
+      if (ethMonth > 12) ethMonth = 13;
+      return { year: ethYear, month: ethMonth, day: ethDay };
+    }
+    function formatEthiopianDate(date) {
+      const eth = gregorianToEthiopian(date);
+      return eth.day + ' ' + ethMonths[eth.month - 1] + ' ' + eth.year;
+    }
+    function updateDateDisplay() {
+      const now = new Date();
+      document.getElementById('todayDateGregorian').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      document.getElementById('todayDateEthiopian').textContent = formatEthiopianDate(now);
+    }
+
+    // ============================================
+    // THEME
+    // ============================================
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('misgepool_theme', next);
+      document.getElementById('themeToggleBtn').innerHTML = next === 'light' ? '<i class="bi bi-moon-fill"></i>' : '<i class="bi bi-sun-fill"></i>';
+    }
+
+    // ============================================
+    // POS
+    // ============================================
+    function setCostPercentage(pct) {
+      currentCostPercentage = pct;
+      document.querySelectorAll('.cost-percentage-btn').forEach(function(c) { c.classList.remove('selected'); });
+      const btns = document.querySelectorAll('.cost-percentage-btn');
+      const percentages = [2, 5, 10, 15, 20, 25];
+      for (let i = 0; i < percentages.length; i++) {
+        if (percentages[i] === pct) btns[i].classList.add('selected');
+      }
+      document.getElementById('selectedCostPercent').textContent = pct + '%';
+      renderCart();
+    }
+    
+    function setPaymentMethod(m) {
+      currentPaymentMethod = m;
+      document.getElementById('paymentCashBtn').classList.toggle('active', m === 'cash');
+      document.getElementById('paymentTransferBtn').classList.toggle('active', m === 'transfer');
+      document.getElementById('paymentLoanBtn').classList.toggle('active', m === 'loan');
+      document.getElementById('transferDetails').style.display = m === 'transfer' ? 'block' : 'none';
+      document.getElementById('loanDetails').style.display = m === 'loan' ? 'block' : 'none';
+    }
+    
+    function renderPOS() {
+      loadSelects();
+      updateCustomerDropdown();
+      const t = translations[currentLang];
+      document.getElementById('typeChips').innerHTML = '<span class="type-chip ' + (!selectedPOSType ? 'active' : '') + '" onclick="selectPOSType(null)">' + t.all + '</span>' + productTypes.map(function(typ) { return '<span class="type-chip ' + (selectedPOSType === typ ? 'active' : '') + '" onclick="selectPOSType(\'' + typ + '\')">' + typ + '</span>'; }).join('');
+      document.getElementById('categoryChips').innerHTML = categories.map(function(c) { return '<span class="category-chip ' + (selectedPOSCategory === c ? 'active' : '') + '" onclick="selectPOSCategory(\'' + c + '\')">' + c + '</span>'; }).join('');
+      if (selectedPOSCategory) showProductsForCategory(selectedPOSCategory);
+      else document.getElementById('selectedCategoryTitle').textContent = t.chooseCategory;
+      renderCart();
+    }
+    
+    function selectPOSType(typ) { selectedPOSType = typ; renderPOS(); }
+    function selectPOSCategory(c) { selectedPOSCategory = c; showProductsForCategory(c); }
+    
+    function showProductsForCategory(cat) {
+      document.getElementById('selectedCategoryTitle').textContent = cat + ' - ' + translations[currentLang].items;
+      let prods = inventory.filter(function(p) { return p.category === cat && p.quantity > 0; });
+      if (selectedPOSType) prods = prods.filter(function(p) { return p.productType === selectedPOSType; });
+      document.getElementById('productsList').innerHTML = prods.length ? prods.map(function(p) { return '<div class="product-card" onclick="addToCart(' + p.id + ')"><div><strong>' + p.name + '</strong></div><div class="small text-muted">' + (currentLang === 'am' ? 'ክምችት' : 'Stock') + ': ' + p.quantity + ' | ' + (currentLang === 'am' ? 'ዋጋ' : 'Cost') + ': ' + p.cost + ' ETB</div></div>'; }).join('') : '<p class="text-muted text-center">' + translations[currentLang].noProducts + '</p>';
+    }
+    
+    function addToCart(pid) {
+      const t = translations[currentLang];
+      const p = inventory.find(function(x) { return x.id === pid; });
+      if (!p || p.quantity < 1) { alert(currentLang === 'am' ? 'ክምችት አልቋል!' : 'Out of stock!'); return; }
+      const ex = currentCart.find(function(x) { return x.id === pid; });
+      if (ex) { if (ex.qty < p.quantity) ex.qty++; else { alert(currentLang === 'am' ? 'በቂ ክምችት የለም!' : 'Not enough stock!'); return; } }
+      else currentCart.push({ id: p.id, name: p.name, cost: p.cost, qty: 1, sellingPrice: 0 });
+      renderCart();
+    }
+    
+    function renderCart() {
+      const t = translations[currentLang];
+      const div = document.getElementById('posCart');
+      let sub = 0, tc = 0;
+      div.innerHTML = currentCart.map(function(item, i) {
+        const rev = (item.sellingPrice || 0) * item.qty;
+        sub += rev;
+        tc += item.cost * item.qty;
+        return '<div class="border rounded p-2 mb-3"><div class="d-flex justify-content-between"><strong>' + item.name + '</strong><span class="badge">x' + item.qty + '</span></div><div class="d-flex gap-2 mt-2 align-items-center"><button class="btn btn-sm btn-outline-secondary" onclick="updateCartQty(' + i + ',-1)">-</button><span>' + item.qty + '</span><button class="btn btn-sm btn-outline-secondary" onclick="updateCartQty(' + i + ',1)">+</button><input type="number" class="form-control" style="width:100px;" value="' + (item.sellingPrice || '') + '" placeholder="' + (currentLang === 'am' ? 'ዋጋ' : 'Price') + '" onchange="updateItemPrice(' + i + ',this.value)"><button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(' + i + ')"><i class="bi bi-trash"></i></button></div><small class="text-muted">' + t.cost + ': ' + item.cost + ' ETB</small></div>';
+      }).join('') || '<p class="text-muted text-center">' + t.cartEmpty + '</p>';
+      const ca = currentCostPercentage ? sub * (currentCostPercentage / 100) : 0;
+      const profit = sub - tc - ca;
+      document.getElementById('cartSubtotal').textContent = sub.toLocaleString() + ' ETB';
+      document.getElementById('cartCostDisplay').textContent = ca.toLocaleString() + ' ETB';
+      document.getElementById('cartProfit').textContent = profit.toLocaleString() + ' ETB';
+      document.getElementById('cartTotal').textContent = sub.toLocaleString() + ' ETB';
+      document.getElementById('selectedCostAmount').textContent = ca.toLocaleString() + ' ETB';
+      document.getElementById('completeSaleBtn').disabled = currentCart.length === 0 || currentCart.some(function(x) { return !x.sellingPrice || x.sellingPrice <= x.cost; });
+    }
+    
+    function updateItemPrice(i, v) { currentCart[i].sellingPrice = parseFloat(v) || 0; renderCart(); }
+    
+    function updateCartQty(i, chg) {
+      const item = currentCart[i];
+      const p = inventory.find(function(x) { return x.id === item.id; });
+      const nq = item.qty + chg;
+      if (nq < 1) { removeFromCart(i); return; }
+      if (nq > p.quantity) { alert((currentLang === 'am' ? 'ብቻ ' : 'Only ') + p.quantity + (currentLang === 'am' ? ' ይገኛል!' : ' available!')); return; }
+      item.qty = nq;
+      renderCart();
+    }
+    
+    function removeFromCart(i) { currentCart.splice(i, 1); renderCart(); }
+    
+    function clearCart() {
+      const t = translations[currentLang];
+      if (confirm(currentLang === 'am' ? 'ጋሪ አጽዳ?' : 'Clear cart?')) {
+        currentCart = [];
+        currentCostPercentage = null;
+        document.querySelectorAll('.cost-percentage-btn').forEach(function(c) { c.classList.remove('selected'); });
+        document.getElementById('selectedCostPercent').textContent = t.none;
+        renderCart();
+      }
+    }
+    
+    function completeSale() {
+      const t = translations[currentLang];
+      if (!currentPaymentMethod) { alert(currentLang === 'am' ? 'የክፍያ ዘዴ ይምረጡ' : 'Select payment method'); return; }
+      if (currentCart.some(function(x) { return !x.sellingPrice || x.sellingPrice <= x.cost; })) {
+        alert(currentLang === 'am' ? 'ትክክለኛ ዋጋ ያስገቡ!' : 'Set valid prices!');
+        return;
+      }
+      
+      let td = null, ld = null;
+      if (currentPaymentMethod === 'transfer') {
+        td = { cn: document.getElementById('transferCustomerName').value, tn: document.getElementById('transferNumber').value };
+        if (!td.cn || !td.tn) { alert(currentLang === 'am' ? 'የትራንስፈር ዝርዝሮችን ያስገቡ' : 'Enter transfer details'); return; }
+      }
+      if (currentPaymentMethod === 'loan') {
+        ld = { cn: document.getElementById('loanCustomerName').value, ph: document.getElementById('loanPhone').value, ed: document.getElementById('loanExpectedDate').value };
+        if (!ld.cn || !ld.ph) { alert(currentLang === 'am' ? 'የብድር ዝርዝሮችን ያስገቡ' : 'Enter loan details'); return; }
+      }
+      
+      const now = new Date();
+      const cid = document.getElementById('posCustomer').value;
+      let cn = t.walkIn;
+      let iw = true;
+      if (cid !== 'walkin') { const c = customers.find(function(x) { return x.id == cid; }); if (c) { cn = c.name; iw = false; } }
+      
+      let rev = 0, tcp = 0;
+      const items = currentCart.map(function(item) {
+        const r = item.sellingPrice * item.qty;
+        rev += r;
+        tcp += item.cost * item.qty;
+        const p = inventory.find(function(x) { return x.id === item.id; });
+        if (p) { p.quantity -= item.qty; if (p.quantity < 0) p.quantity = 0; }
+        return { id: item.id, name: item.name, qty: item.qty, cost: item.cost, price: item.sellingPrice };
+      });
+      
+      const cp = currentCostPercentage || 0;
+      const lc = rev * (cp / 100);
+      const profit = rev - tcp - lc;
+      
+      sales.push({
+        id: Date.now(), date: now.toISOString(), customerId: iw ? null : parseInt(cid), customerName: cn,
+        items: items, revenue: rev, costPrice: tcp, laborCost: lc, costPercentage: cp, profit: profit,
+        paymentMethod: currentPaymentMethod, transferDetails: td,
+        loanStatus: currentPaymentMethod === 'loan' ? 'pending' : null, loanDetails: ld
+      });
+      
+      if (!iw) {
+        const c = customers.find(function(x) { return x.id == cid; });
+        if (c) { c.totalPurchases = (c.totalPurchases || 0) + 1; c.lastPurchase = now.toISOString(); }
+      }
+      
+      saveAll();
+      currentCart = [];
+      currentCostPercentage = null;
+      currentPaymentMethod = null;
+      document.querySelectorAll('.cost-percentage-btn').forEach(function(c) { c.classList.remove('selected'); });
+      document.getElementById('selectedCostPercent').textContent = t.none;
+      document.getElementById('transferDetails').style.display = 'none';
+      document.getElementById('loanDetails').style.display = 'none';
+      renderCart();
+      if (selectedPOSCategory) showProductsForCategory(selectedPOSCategory);
+      
+      alert((currentLang === 'am' ? 'ሽያጭ ተጠናቋል!\nጠቅላላ: ' : 'Sale completed!\nTotal: ') + rev.toLocaleString() + ' ETB\n' + t.laborCost + ': ' + lc.toLocaleString() + ' ETB (' + cp + '%)\n' + t.profit + ': ' + profit.toLocaleString() + ' ETB');
+      updateDashboard();
+    }
+    
+    function updateCustomerDropdown() {
+      const sel = document.getElementById('posCustomer');
+      if (sel) sel.innerHTML = '<option value="walkin">' + translations[currentLang].walkIn + '</option>' + customers.map(function(c) { return '<option value="' + c.id + '">' + c.name + '</option>'; }).join('');
+    }
+
+    // ============================================
+    // SALES HISTORY
+    // ============================================
+    function getDateFromOffset(offset) { const d = new Date(); d.setDate(d.getDate() + offset); return d.toISOString().split('T')[0]; }
+    function navigateDay(d) { currentDayOffset += d; loadSalesForDay(); }
+    function filterSalesByPayment(f) {
+      currentPaymentFilter = f;
+      document.getElementById('filterAllBtn').classList.toggle('active', f === 'all');
+      document.getElementById('filterCashBtn').classList.toggle('active', f === 'cash');
+      document.getElementById('filterTransferBtn').classList.toggle('active', f === 'transfer');
+      document.getElementById('filterLoanBtn').classList.toggle('active', f === 'loan');
+      loadSalesForDay();
+    }
+    
+    function loadSalesForDay() {
+      const t = translations[currentLang];
+      const td = getDateFromOffset(currentDayOffset);
+      document.getElementById('currentDayDisplay').textContent = new Date(td).toLocaleDateString();
+      document.getElementById('dayStatus').textContent = currentDayOffset === 0 ? t.today : '';
+      
+      let ds = sales.filter(function(s) { return s.date.startsWith(td); });
+      if (currentPaymentFilter !== 'all') ds = ds.filter(function(s) { return s.paymentMethod === currentPaymentFilter; });
+      ds = ds.reverse();
+      
+      let rev = 0, cost = 0, prof = 0;
+      ds.forEach(function(s) { rev += s.revenue; cost += (s.laborCost || 0); prof += s.profit; });
+      document.getElementById('dailyRevenue').textContent = rev.toLocaleString() + ' ETB';
+      document.getElementById('dailyCost').textContent = cost.toLocaleString() + ' ETB';
+      document.getElementById('dailyProfit').textContent = prof.toLocaleString() + ' ETB';
+      
+      // Hide profit card and column headers for cashier
+      const isCashierView = !isAdmin();
+      document.getElementById('dailyProfitCard').style.display = isCashierView ? 'none' : 'block';
+      document.getElementById('profitHeader').style.display = isCashierView ? 'none' : '';
+      document.getElementById('actionsHeaderSales').style.display = isCashierView ? 'none' : '';
+      
+      document.getElementById('salesBody').innerHTML = ds.map(function(s) {
+        const sd = new Date(s.date);
+        const pm = s.paymentMethod === 'cash' ? '💰 ' + t.cash : s.paymentMethod === 'transfer' ? '📱 ' + t.transfer : '📋 ' + t.loan;
+        const st = s.paymentMethod === 'loan' ? (s.loanStatus === 'paid' ? '<span class="badge badge-paid">' + (currentLang === 'am' ? 'ተከፍሏል' : 'Paid') + '</span>' : '<span class="badge badge-pending">' + (currentLang === 'am' ? 'ያልተከፈለ' : 'Pending') + '</span>') : '<span class="badge badge-success">' + (currentLang === 'am' ? 'ተከፍሏል' : 'Paid') + '</span>';
+        const cd = s.costPercentage ? s.costPercentage + '%' : '-';
+        
+        // Profit column - hidden for cashier
+        const profitCol = isCashierView ? '' : '<td>' + s.profit.toLocaleString() + ' ETB</td>';
+        
+        // Actions column - hidden for cashier
+        const actionsCol = isCashierView ? '' : '<td><button class="btn btn-sm btn-info" onclick="viewSaleDetails(' + s.id + ')"><i class="bi bi-eye"></i></button>' + (s.paymentMethod === 'loan' && s.loanStatus === 'pending' ? '<button class="btn btn-sm btn-success" onclick="markLoanPaid(' + s.id + ')">✅</button>' : '') + '<button class="btn btn-sm btn-danger" onclick="deleteSale(' + s.id + ')"><i class="bi bi-trash"></i></button></td>';
+        
+        return '<tr><td>' + sd.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + '</td><td>' + s.customerName + '</td><td>' + pm + '</td><td>' + st + '</td><td><span class="badge badge-cost">' + cd + '</span></td><td>' + s.items.map(function(i) { return i.qty + 'x ' + i.name; }).join(', ') + '</td><td>' + s.revenue.toLocaleString() + ' ETB</td>' + profitCol + actionsCol + '</tr>';
+      }).join('') || '<tr><td colspan="' + (isCashierView ? '7' : '9') + '" class="text-center">' + (currentLang === 'am' ? 'ለዚህ ቀን ምንም ሽያጭ የለም' : 'No sales for this day') + '</td></tr>';
+    }
+    
+    function viewSaleDetails(id) {
+      if (!isAdmin()) return;
+      const t = translations[currentLang];
+      const s = sales.find(function(x) { return x.id === id; });
+      if (!s) return;
+      document.getElementById('orderDetailContent').innerHTML = '<p><strong>' + (currentLang === 'am' ? 'ቀን' : 'Date') + ':</strong> ' + new Date(s.date).toLocaleString() + '</p><p><strong>' + t.customer + ':</strong> ' + s.customerName + '</p><p><strong>' + t.payment + ':</strong> ' + s.paymentMethod + '</p><p><strong>' + t.items + ':</strong></p><ul>' + s.items.map(function(i) { return '<li>' + i.name + ' x' + i.qty + ' @ ' + i.price + ' ETB = ' + (i.price * i.qty).toLocaleString() + ' ETB</li>'; }).join('') + '</ul><p><strong>' + t.revenue + ':</strong> ' + s.revenue.toLocaleString() + ' ETB</p><p><strong>' + t.laborCost + ':</strong> ' + (s.laborCost || 0).toLocaleString() + ' ETB (' + (s.costPercentage || 0) + '%)</p><p style="color:#10b981;"><strong>' + t.profit + ':</strong> ' + s.profit.toLocaleString() + ' ETB</p>';
+      new bootstrap.Modal(document.getElementById('orderDetailModal')).show();
+    }
+    
+    function markLoanPaid(id) {
+      if (!isAdmin()) return;
+      const s = sales.find(function(x) { return x.id === id; });
+      const confirmMsg = currentLang === 'am' ? 'እንደተከፈለ ምልክት አድርግ?' : 'Mark as paid?';
+      if (s && confirm(confirmMsg)) { s.loanStatus = 'paid'; s.paidDate = new Date().toISOString(); saveAll(); loadSalesForDay(); renderPendingPayments(); updateDashboard(); }
+    }
+    
+    function deleteSale(id) {
+      if (!isAdmin()) return;
+      const confirmMsg = currentLang === 'am' ? 'ይህን ሽያጭ ሰርዝ?' : 'Delete this sale?';
+      if (confirm(confirmMsg)) {
+        const s = sales.find(function(x) { return x.id === id; });
+        if (s && !(s.paymentMethod === 'loan' && s.loanStatus === 'paid')) {
+          s.items.forEach(function(i) { const p = inventory.find(function(x) { return x.id === i.id; }); if (p) p.quantity += i.qty; });
+        }
+        sales = sales.filter(function(x) { return x.id !== id; });
+        saveAll();
+        loadSalesForDay();
+        renderPendingPayments();
+        updateDashboard();
+        renderInventory();
+      }
+    }
+
+    // ============================================
+    // PENDING PAYMENTS
+    // ============================================
+    function renderPendingPayments() {
+      const t = translations[currentLang];
+      const ps = sales.filter(function(s) { return s.paymentMethod === 'loan' && s.loanStatus === 'pending'; });
+      document.getElementById('totalPendingAmount').textContent = ps.reduce(function(s, x) { return s + x.revenue; }, 0).toLocaleString() + ' ETB';
+      document.getElementById('pendingCustomersCount').textContent = new Set(ps.map(function(s) { return s.loanDetails?.cn; })).size;
+      document.getElementById('pendingItemsCount').textContent = ps.reduce(function(s, x) { return s + x.items.reduce(function(a, i) { return a + i.qty; }, 0); }, 0);
+      
+      document.getElementById('pendingPaymentsList').innerHTML = ps.length ? ps.map(function(s) {
+        const markPaidBtn = isAdmin() ? '<button class="btn btn-sm btn-success w-100" onclick="markLoanPaid(' + s.id + ')">' + (currentLang === 'am' ? 'ተከፍሏል ምልክት አድርግ' : 'Mark Paid') + '</button>' : '';
+        return '<div class="pending-payment-card"><div class="row"><div class="col-md-4"><h6>' + (s.loanDetails?.cn || s.customerName) + '</h6><small>📞 ' + (s.loanDetails?.ph || '-') + '</small><br><small>📅 ' + new Date(s.date).toLocaleDateString() + '</small></div><div class="col-md-3"><strong>' + (currentLang === 'am' ? 'የሚጠበቅ:' : 'Expected:') + '</strong> ' + (s.loanDetails?.ed || '-') + '</div><div class="col-md-2"><h5 style="color:#f59e0b;">' + s.revenue.toLocaleString() + ' ETB</h5></div><div class="col-md-3">' + markPaidBtn + '</div></div></div>';
+      }).join('') : '<p class="text-center text-muted">' + (currentLang === 'am' ? 'ምንም ያልተከፈለ ክፍያ የለም' : 'No pending payments') + '</p>';
+    }
+
+    // ============================================
+    // CUSTOMERS
+    // ============================================
+    function renderCustomers() {
+      const t = translations[currentLang];
+      const search = (document.getElementById('searchCustomer')?.value || '').toLowerCase();
+      const fl = customers.filter(function(c) { return c.name.toLowerCase().includes(search); });
+      document.getElementById('customersBody').innerHTML = fl.map(function(c) {
+        return '<tr><td>' + c.name + '</td><td>' + (c.phone || '-') + '</td><td>' + (c.totalPurchases || 0) + '</td><td>' + (c.lastPurchase ? new Date(c.lastPurchase).toLocaleDateString() : '-') + '</td><td><button class="btn btn-sm btn-outline-primary" onclick="viewCustomerHistory(' + c.id + ')"><i class="bi bi-clock-history"></i></button></td></tr>';
+      }).join('') || '<tr><td colspan="5" class="text-center">' + (currentLang === 'am' ? 'ምንም ደንበኞች የሉም' : 'No customers') + '</td></tr>';
+    }
+    
+    function showAddCustomerModal() {
+      if (!isAdmin()) return;
+      const t = translations[currentLang];
+      const name = prompt(currentLang === 'am' ? 'የደንበኛ ስም:' : 'Customer name:');
+      if (!name) return;
+      const phone = prompt(currentLang === 'am' ? 'ስልክ (አማራጭ):' : 'Phone (optional):');
+      customers.push({ id: Date.now(), name: name, phone: phone || '', totalPurchases: 0, joinDate: new Date().toISOString() });
+      saveAll();
+      renderCustomers();
+      updateCustomerDropdown();
+    }
+    
+    function viewCustomerHistory(cid) {
+      const t = translations[currentLang];
+      const c = customers.find(function(x) { return x.id === cid; });
+      if (!c) return;
+      const cs = sales.filter(function(s) { return s.customerId === cid; });
+      document.getElementById('customerHistoryContent').innerHTML = '<h5>' + c.name + '</h5><p>' + t.totalPurchases + ': ' + (c.totalPurchases || 0) + ' | ' + t.phone + ': ' + (c.phone || '-') + '</p>' + (cs.length ? cs.map(function(s) { return '<div class="border rounded p-2 mb-2"><strong>' + new Date(s.date).toLocaleDateString() + '</strong> - ' + s.revenue.toLocaleString() + ' ETB</div>'; }).join('') : '<p class="text-muted">' + (currentLang === 'am' ? 'ምንም ግዢ የለም' : 'No purchases') + '</p>');
+      new bootstrap.Modal(document.getElementById('customerHistoryModal')).show();
+    }
+
+    // ============================================
+    // CATEGORIES & TYPES
+    // ============================================
+    function renderCategoriesAndTypes() {
+      if (!isAdmin()) return;
+      document.getElementById('categoriesList').innerHTML = categories.map(function(c) { return '<div class="list-group-item d-flex justify-content-between align-items-center"><span>' + c + '</span><button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(\'' + c + '\')"><i class="bi bi-trash"></i></button></div>'; }).join('');
+      document.getElementById('typesList').innerHTML = productTypes.map(function(typ) { return '<div class="list-group-item d-flex justify-content-between align-items-center"><span>' + typ + '</span><button class="btn btn-sm btn-outline-danger" onclick="deleteType(\'' + typ + '\')"><i class="bi bi-trash"></i></button></div>'; }).join('');
+    }
+    
+    function showAddCategoryModal() {
+      if (!isAdmin()) return;
+      const c = prompt(currentLang === 'am' ? 'የምድብ ስም:' : 'Category name:');
+      if (c && !categories.includes(c)) { categories.push(c); saveAll(); renderCategoriesAndTypes(); loadSelects(); }
+    }
+    
+    function deleteCategory(c) {
+      if (!isAdmin()) return;
+      if (inventory.some(function(i) { return i.category === c; })) { alert(currentLang === 'am' ? 'ምርቶች ያሉትን ምድብ መሰረዝ አይቻልም!' : 'Cannot delete category with products!'); return; }
+      if (confirm((currentLang === 'am' ? 'ሰርዝ "' : 'Delete "') + c + '"?')) { categories = categories.filter(function(x) { return x !== c; }); saveAll(); renderCategoriesAndTypes(); loadSelects(); }
+    }
+    
+    function showAddTypeModal() {
+      if (!isAdmin()) return;
+      const typ = prompt(currentLang === 'am' ? 'የዓይነት ስም:' : 'Type name:');
+      if (typ && !productTypes.includes(typ)) { productTypes.push(typ); saveAll(); renderCategoriesAndTypes(); loadSelects(); }
+    }
+    
+    function deleteType(typ) {
+      if (!isAdmin()) return;
+      if (inventory.some(function(i) { return i.productType === typ; })) { alert(currentLang === 'am' ? 'ምርቶች ያሉትን ዓይነት መሰረዝ አይቻልም!' : 'Cannot delete type with products!'); return; }
+      if (confirm((currentLang === 'am' ? 'ሰርዝ "' : 'Delete "') + typ + '"?')) { productTypes = productTypes.filter(function(x) { return x !== typ; }); saveAll(); renderCategoriesAndTypes(); loadSelects(); }
+    }
+    
+    function loadSelects() {
+      const pts = document.getElementById('productTypeSelect');
+      if (pts) pts.innerHTML = '<option value="">' + translations[currentLang].selectType + '</option>' + productTypes.map(function(typ) { return '<option>' + typ + '</option>'; }).join('');
+      const cs = document.getElementById('productCategory');
+      if (cs) cs.innerHTML = '<option value="">' + translations[currentLang].selectCategory + '</option>' + categories.map(function(c) { return '<option>' + c + '</option>'; }).join('');
+      const fc = document.getElementById('filterCategory');
+      if (fc) fc.innerHTML = '<option value="all">' + translations[currentLang].allCategories + '</option>' + categories.map(function(c) { return '<option>' + c + '</option>'; }).join('');
+      const ft = document.getElementById('filterProductType');
+      if (ft) ft.innerHTML = '<option value="all">' + translations[currentLang].allTypes + '</option>' + productTypes.map(function(typ) { return '<option>' + typ + '</option>'; }).join('');
+    }
+
+    // ============================================
+    // DASHBOARD
+    // ============================================
+    function updateDashboard() {
+      const t = translations[currentLang];
+      const today = new Date().toISOString().split('T')[0];
+      const ts = sales.filter(function(s) { return s.date.startsWith(today); });
+      let rev = 0, cost = 0, prof = 0;
+      ts.forEach(function(s) { rev += s.revenue; cost += (s.laborCost || 0); prof += s.profit; });
+      document.getElementById('todayRevenue').textContent = rev.toLocaleString() + ' ETB';
+      document.getElementById('todayCost').textContent = cost.toLocaleString() + ' ETB';
+      document.getElementById('todayProfit').textContent = prof.toLocaleString() + ' ETB';
+      document.getElementById('totalProducts').textContent = inventory.length;
+      document.getElementById('lowStockCount').textContent = inventory.filter(function(x) { return x.quantity < 5; }).length;
+      let ar = 0, ap = 0;
+      sales.forEach(function(s) { ar += s.revenue; ap += s.profit; });
+      document.getElementById('allTimeRevenue').textContent = ar.toLocaleString() + ' ETB';
+      document.getElementById('allTimeProfit').textContent = ap.toLocaleString() + ' ETB';
+      const pn = sales.filter(function(s) { return s.paymentMethod === 'loan' && s.loanStatus === 'pending'; });
+      document.getElementById('pendingAmount').textContent = pn.reduce(function(s, x) { return s + x.revenue; }, 0).toLocaleString() + ' ETB';
+      
+      document.getElementById('lowStockBody').innerHTML = inventory.filter(function(x) { return x.quantity < 5; }).map(function(x) { return '<tr><td>' + x.name + '</td><td><span class="badge badge-danger">' + x.quantity + '</span></td><td><button class="btn btn-sm btn-primary" onclick="addToCart(' + x.id + ');showView(\'pos\');">' + (currentLang === 'am' ? 'ሽጥ' : 'Sell') + '</button></td></tr>'; }).join('') || '<tr><td colspan="3" class="text-center">' + t.allStockOK + '</td></tr>';
+      updateDateDisplay();
+    }
+
+    // ============================================
+    // SECURITY
+    // ============================================
+    function changeAdminPassword() {
+      if (!isAdmin()) return;
+      const cp = document.getElementById('currentPassword').value;
+      const np = document.getElementById('newPassword').value;
+      const conp = document.getElementById('confirmNewPassword').value;
+      const msg = document.getElementById('passwordChangeMsg');
+      msg.style.display = 'block';
+      
+      if (cp !== adminPassword) { msg.innerHTML = '<span style="color:#dc2626;">' + (currentLang === 'am' ? 'የአሁኑ የይለፍ ቃል ስህተት ነው!' : 'Wrong current password!') + '</span>'; return; }
+      if (np.length < 4) { msg.innerHTML = '<span style="color:#dc2626;">' + (currentLang === 'am' ? 'የይለፍ ቃል በጣም አጭር ነው!' : 'Password too short!') + '</span>'; return; }
+      if (np !== conp) { msg.innerHTML = '<span style="color:#dc2626;">' + (currentLang === 'am' ? 'የይለፍ ቃሎች አይዛመዱም!' : 'Passwords do not match!') + '</span>'; return; }
+      
+      adminPassword = np;
+      localStorage.setItem('misgepool_admin_password', adminPassword);
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmNewPassword').value = '';
+      msg.innerHTML = '<span style="color:#10b981;">' + (currentLang === 'am' ? '✅ የይለፍ ቃል ተዘምኗል!' : '✅ Password updated!') + '</span>';
+      saveAll();
+      setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    }
+    
+    function exportData() {
+      if (!isAdmin()) return;
+      const data = { inventory, sales, customers, categories, productTypes, adminPassword, exportDate: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'misgepool_backup_' + new Date().toISOString().split('T')[0] + '.json';
+      a.click();
+    }
+    
+    function importData(input) {
+      if (!isAdmin()) return;
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const d = JSON.parse(e.target.result);
+          if (confirm(currentLang === 'am' ? 'ምትኬ እነበረበት መልስ?' : 'Restore backup?')) {
+            if (d.inventory) inventory = d.inventory;
+            if (d.sales) sales = d.sales;
+            if (d.customers) customers = d.customers;
+            if (d.categories) categories = d.categories;
+            if (d.productTypes) productTypes = d.productTypes;
+            if (d.adminPassword) { adminPassword = d.adminPassword; localStorage.setItem('misgepool_admin_password', adminPassword); }
+            saveAll();
+            alert(currentLang === 'am' ? '✅ ተመልሷል!' : '✅ Restored!');
+            location.reload();
+          }
+        } catch (err) { alert(currentLang === 'am' ? 'ልክ ያልሆነ ፋይል!' : 'Invalid file!'); }
+      };
+      reader.readAsText(file);
+      input.value = '';
+    }
+    
+    function factoryReset() {
+      if (!isAdmin()) return;
+      const confirmPrompt = currentLang === 'am' ? 'ለማረጋገጥ "DELETE" ብለው ይጻፉ:' : 'Type "DELETE" to confirm:';
+      if (prompt(confirmPrompt) === 'DELETE') {
+        sales = [];
+        saveAll();
+        alert(currentLang === 'am' ? 'ጸድቷል!' : 'Cleared!');
+        location.reload();
+      }
+    }
+
+    // ============================================
+    // AUTHENTICATION
+    // ============================================
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('adminRoleCard').classList.toggle('selected', role === 'admin');
+      document.getElementById('cashierRoleCard').classList.toggle('selected', role === 'cashier');
+      document.getElementById('passwordSection').classList.toggle('show', role === 'admin');
+      document.getElementById('loginError').classList.remove('show');
+      
+      if (role === 'cashier') {
+        document.getElementById('loginButton').disabled = false;
+      } else {
+        document.getElementById('loginButton').disabled = document.getElementById('loginPassword').value.length === 0;
+      }
+    }
+    
+    function togglePasswordVisibility() {
+      const input = document.getElementById('loginPassword');
+      const btn = document.getElementById('togglePwdBtn');
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="bi bi-eye-fill"></i>';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
+      }
+    }
+    
+    function handleLogin() {
+      const err = document.getElementById('loginError');
+      err.classList.remove('show');
+      
+      if (!selectedRole) {
+        err.textContent = currentLang === 'am' ? '⚠️ እባክዎ መጀመሪያ ሚና ይምረጡ።' : '⚠️ Please select a role first.';
+        err.classList.add('show');
+        return;
+      }
+      
+      if (selectedRole === 'cashier') {
+        currentUser = { role: 'cashier', username: 'Cashier' };
+        enterApp();
+        return;
+      }
+      
+      if (selectedRole === 'admin') {
+        if (document.getElementById('loginPassword').value === adminPassword) {
+          currentUser = { role: 'admin', username: 'Admin' };
+          enterApp();
+        } else {
+          err.classList.add('show');
+          document.getElementById('loginPassword').value = '';
+        }
+      }
+    }
+    
+    async function enterApp() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      document.getElementById('loggedInUserDisplay').textContent = currentUser.username;
+      
+      const badge = document.getElementById('loggedInRoleBadge');
+      badge.textContent = currentUser.role === 'admin' ? 'ADMIN' : 'CASHIER';
+      badge.className = 'user-role-badge ' + (currentUser.role === 'admin' ? 'admin-badge' : 'cashier-badge');
+      
+      updateSyncStatus(isOnline ? 'online' : 'offline');
+      applyRoleRestrictions();
+      await loadFromCloud();
+      setupRealTimeListeners();
+      initializeApp();
+      translatePage(currentLang);
+    }
+    
+    function applyRoleRestrictions() {
+      const isCashierView = !isAdmin();
+      const cashierViews = ['inventory', 'pos', 'sales'];
+      document.querySelectorAll('#sidebarNav .nav-link').forEach(function(link) {
+        const viewId = link.getAttribute('data-view');
+        if (!viewId) return;
+        if (isCashierView && !cashierViews.includes(viewId)) {
+          link.classList.add('disabled-link');
+        } else {
+          link.classList.remove('disabled-link');
+        }
+      });
+    }
+    
+    function handleLogout() {
+      const confirmMsg = currentLang === 'am' ? 'ውጣ?' : 'Logout?';
+      if (confirm(confirmMsg)) {
+        unsubscribeListeners.forEach(function(u) { if (u) u(); });
+        unsubscribeListeners = [];
+        currentUser = null;
+        selectedRole = null;
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('adminRoleCard').classList.remove('selected');
+        document.getElementById('cashierRoleCard').classList.remove('selected');
+        document.getElementById('passwordSection').classList.remove('show');
+        document.getElementById('loginButton').disabled = true;
+        document.getElementById('loginError').classList.remove('show');
+        document.getElementById('loginPassword').value = '';
+        currentCart = [];
+        updateSyncStatus('offline');
+        translatePage(currentLang);
+      }
+    }
+
+    // ============================================
+    // NAVIGATION
+    // ============================================
+    function showView(viewId) {
+      // Check permissions for restricted views
+      const adminOnlyViews = ['add-product', 'pending-payments', 'customers', 'categories', 'security'];
+      if (!isAdmin() && adminOnlyViews.includes(viewId)) {
+        alert(translations[currentLang].notAllowed || 'You do not have permission to access this page.');
+        return;
+      }
+      
+      document.querySelectorAll('.view').forEach(function(v) { v.classList.add('d-none'); });
+      document.getElementById(viewId).classList.remove('d-none');
+      
+      document.querySelectorAll('[data-view]').forEach(function(el) {
+        el.classList.toggle('active', el.getAttribute('data-view') === viewId);
+      });
+      
+      if (window.innerWidth < 992) document.getElementById('sidebar').classList.remove('show');
+      
+      if (viewId !== 'add-product') {
+        resetToAddMode();
+      }
+      
+      switch(viewId) {
+        case 'dashboard': updateDashboard(); break;
+        case 'inventory': renderInventory(); break;
+        case 'pos': renderPOS(); break;
+        case 'sales': currentDayOffset = 0; loadSalesForDay(); break;
+        case 'pending-payments': renderPendingPayments(); break;
+        case 'customers': renderCustomers(); break;
+        case 'categories': renderCategoriesAndTypes(); break;
+        case 'add-product': loadSelects(); toggleTypeField(); break;
+      }
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    function initializeApp() {
+      loadSelects();
+      updateCustomerDropdown();
+      if (currentUser && currentUser.role === 'cashier') showView('pos');
+      else showView('dashboard');
+      updateDashboard();
+      updateDateDisplay();
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    function initAllListeners() {
+      document.getElementById('adminRoleCard').addEventListener('click', function() { selectRole('admin'); });
+      document.getElementById('cashierRoleCard').addEventListener('click', function() { selectRole('cashier'); });
+      
+      document.getElementById('togglePwdBtn').addEventListener('click', togglePasswordVisibility);
+      document.getElementById('loginButton').addEventListener('click', handleLogin);
+      
+      document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') handleLogin();
+      });
+      
+      document.getElementById('loginPassword').addEventListener('input', function() {
+        if (selectedRole === 'admin') document.getElementById('loginButton').disabled = this.value.length === 0;
+      });
+      
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+      document.getElementById('langEnBtn').addEventListener('click', function() { setLanguage('en'); });
+      document.getElementById('langAmBtn').addEventListener('click', function() { setLanguage('am'); });
+      
+      document.getElementById('menuToggle').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('show');
+      });
+      
+      document.getElementById('searchInventory').addEventListener('input', renderInventory);
+      document.getElementById('filterCategory').addEventListener('change', renderInventory);
+      document.getElementById('filterProductType').addEventListener('change', renderInventory);
+      document.getElementById('searchCustomer').addEventListener('input', renderCustomers);
+      
+      document.getElementById('productCategory').addEventListener('change', toggleTypeField);
+      
+      document.getElementById('clearCartBtn').addEventListener('click', clearCart);
+      document.getElementById('completeSaleBtn').addEventListener('click', completeSale);
+      
+      document.getElementById('paymentCashBtn').addEventListener('click', function() { setPaymentMethod('cash'); });
+      document.getElementById('paymentTransferBtn').addEventListener('click', function() { setPaymentMethod('transfer'); });
+      document.getElementById('paymentLoanBtn').addEventListener('click', function() { setPaymentMethod('loan'); });
+      
+      document.querySelectorAll('.cost-percentage-btn').forEach(function(btn, i) {
+        const percentages = [2, 5, 10, 15, 20, 25];
+        btn.addEventListener('click', function() { setCostPercentage(percentages[i]); });
+      });
+      
+      document.getElementById('filterAllBtn').addEventListener('click', function() { filterSalesByPayment('all'); });
+      document.getElementById('filterCashBtn').addEventListener('click', function() { filterSalesByPayment('cash'); });
+      document.getElementById('filterTransferBtn').addEventListener('click', function() { filterSalesByPayment('transfer'); });
+      document.getElementById('filterLoanBtn').addEventListener('click', function() { filterSalesByPayment('loan'); });
+      
+      document.getElementById('prevDayBtn').addEventListener('click', function() { navigateDay(-1); });
+      document.getElementById('nextDayBtn').addEventListener('click', function() { navigateDay(1); });
+      
+      document.getElementById('addCustomerBtn').addEventListener('click', showAddCustomerModal);
+      document.getElementById('addCategoryBtn').addEventListener('click', showAddCategoryModal);
+      document.getElementById('addTypeBtn').addEventListener('click', showAddTypeModal);
+      
+      document.getElementById('exportBtn').addEventListener('click', exportData);
+      document.getElementById('importBtn').addEventListener('click', function() { document.getElementById('importFile').click(); });
+      document.getElementById('importFile').addEventListener('change', function() { importData(this); });
+      document.getElementById('uploadCloudBtn').addEventListener('click', uploadBackupToCloud);
+      document.getElementById('downloadCloudBtn').addEventListener('click', downloadBackupFromCloud);
+      document.getElementById('factoryResetBtn').addEventListener('click', factoryReset);
+      document.getElementById('updatePasswordBtn').addEventListener('click', changeAdminPassword);
+      
+      document.querySelectorAll('[data-view]').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (!this.classList.contains('disabled-link')) {
+            showView(this.getAttribute('data-view'));
+          }
+        });
+      });
+      
+      window.addEventListener('online', function() { isOnline = true; updateSyncStatus('online'); syncToCloud(); });
+      window.addEventListener('offline', function() { isOnline = false; updateSyncStatus('offline'); });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAllListeners();
+      loadSelects();
+      const savedTheme = localStorage.getItem('misgepool_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('themeToggleBtn').innerHTML = savedTheme === 'light' ? '<i class="bi bi-moon-fill"></i>' : '<i class="bi bi-sun-fill"></i>';
+      translatePage(currentLang);
+    });
+  </script>
+
+</body>
+</html>
